@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
-library(readr)
+library(tidyverse)
 library(here)
 ```
 
@@ -32,5 +32,43 @@ eleicoes_data <- read_csv(
     media_despesa = col_double(),
     votos = col_integer(),
     .default = col_character()))
+```
+
+```{r}
+data_2006 = eleicoes_data %>% 
+  filter(ano == 2006)
+
+data_2010 = eleicoes_data %>% 
+  filter(ano == 2010)
+```
+
+```{r}
+# participação feminina
+data_2006_genner_general = data_2006 %>% 
+  group_by(sexo) %>% 
+  summarise(num = n())
+
+parties_with_more_candidates_2006 = data_2006 %>% 
+  group_by(partido) %>% 
+  summarise(num = n()) %>% 
+  top_n(5, num)
+
+data_2006_genner = data_2006 %>% 
+  filter(partido %in%  parties_with_more_candidates_2006$partido) %>% 
+  group_by(sexo, partido) %>%
+  summarise(num = n()) %>% 
+  group_by(partido)
+```
+
+```{r}
+# escolaridade
+schooling = data_2006 %>% 
+  group_by(grau) %>% 
+  summarise(num = n())
+
+accupation = data_2006 %>% 
+  group_by(ocupacao) %>% 
+  summarise(num = n()) %>% 
+  top_n(10, num)
 ```
 
