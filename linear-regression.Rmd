@@ -72,3 +72,16 @@ accupation = data_2006 %>%
   top_n(10, num)
 ```
 
+```{r}
+paries_with_more_money_2006 = data_2006 %>% 
+  group_by(partido) %>% 
+  summarise(
+    total = sum(total_receita), 
+    self = sum(recursos_proprios) + sum(recursos_de_partido_politico),
+    donations = sum(recursos_de_pessoas_fisicas) + sum(recursos_de_pessoas_juridicas),
+    by_people = sum(recursos_de_pessoas_fisicas),
+    by_companies = sum(recursos_de_pessoas_juridicas)) %>% 
+  top_n(10, total) 
+
+```
+
