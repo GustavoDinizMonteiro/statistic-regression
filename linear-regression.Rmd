@@ -2,37 +2,57 @@
 title: "Usando Regressão Linear para Explicar a votação de Deputados"
 author: "Gustavo Monteiro"
 date: "October 3, 2018"
-output: html_document
+output:
+  prettydoc::html_pretty:
+    theme: architect
+    highlight: github
 ---
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
 library(tidyverse)
 library(here)
+
+theme_set(theme_gray())
 ```
 
+A base de dados que será usada nesse estudo consiste em dados sobre as votações que candidatos à Câmara Federal de Deputados receberam nos anos de 2006 e 2010, além de informações sobre arreadação de campanha, partido, escolaridade, etc.. dos mesmos.
+
+A seguir uma breve decrição sobre os campos disponiveis para cada registro na base de dados.
 ```{r}
+## Loading data with correct data types.
+
 eleicoes_data <- read_csv(
   here('./eleicoes_2006_e_2010.csv'), 
-  local=readr::locale("br"),
+  local= locale("br"),
   col_types = cols(
-    ano = col_integer(),
-    sequencial_candidato = col_character(),
+    ano = col_integer(), # ano de referencia
+    sequencial_candidato = col_character(), # id do candidato
     quantidade_doacoes = col_integer(),
-    quantidade_doadores = col_integer(),
-    total_receita = col_double(),
-    media_receita = col_double(),
-    recursos_de_outros_candidatos.comites = col_double(),
-    recursos_de_pessoas_fisicas = col_double(),
-    recursos_de_pessoas_juridicas = col_double(),
-    recursos_proprios = col_double(),
-    `recursos_de_partido_politico` = col_double(),
+    quantidade_doadores = col_integer(), # número de doadores diferentes
+    total_receita = col_double(), # soma em R$ das doações
+    media_receita = col_double(), # média das doações
+    recursos_de_outros_candidatos.comites = col_double(), # quantia em R$ das doações provenientes de outros candidatos ou comite partidário
+    recursos_de_pessoas_fisicas = col_double(), # quantia em R$ das doações provenientes de outros CPFs
+    recursos_de_pessoas_juridicas = col_double(), # quantia em R$ das doações provenientes de outros CNPJ
+    recursos_proprios = col_double(), # quantia em R$ das doações provenientes do próprio candidato
+    `recursos_de_partido_politico` = col_double(), # quantia em R$ das doações provenientes do partido político do candidato
     quantidade_despesas = col_integer(),
-    quantidade_fornecedores = col_integer(),
-    total_despesa = col_double(),
-    media_despesa = col_double(),
-    votos = col_integer(),
+    quantidade_fornecedores = col_integer(), # número de fornecedores/despesas diferentes
+    total_despesa = col_double(), # soma em R$ das despesas de campanha
+    media_despesa = col_double(), # média das despesas de campanha
+    votos = col_integer(), #  variável alvo. Se refere ao número de votos na campanha de 2006 ou 2010
     .default = col_character()))
 ```
+
+Uma breve amostra sobre os dados: 
+```{r}
+sample_n(eleicoes_data, 7)
+```
+Para uma melhor descrição dos tipos das colunas:
+```{r}
+sapply(eleicoes_data , class)
+```
+
 
 ```{r}
 data_2006 = eleicoes_data %>% 
