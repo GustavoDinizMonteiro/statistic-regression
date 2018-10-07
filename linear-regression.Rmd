@@ -9,8 +9,8 @@ output:
 ---
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
-library(tidyverse)
 library(here)
+library(tidyverse)
 
 theme_set(theme_gray())
 ```
@@ -46,7 +46,7 @@ eleicoes_data <- read_csv(
 
 Uma breve amostra sobre os dados: 
 ```{r}
-sample_n(eleicoes_data, 7)
+sample_n(eleicoes_data %>%  select(ano, nome, uf, partido), 7)
 ```
 Para uma melhor descrição dos tipos das colunas:
 ```{r}
@@ -55,6 +55,7 @@ sapply(eleicoes_data , class)
 
 
 ```{r}
+# separating data by year
 data_2006 = eleicoes_data %>% 
   filter(ano == 2006)
 
@@ -63,10 +64,15 @@ data_2010 = eleicoes_data %>%
 ```
 
 ```{r}
-# participação feminina
+# analyzing the participation by gender
 data_2006_genner_general = data_2006 %>% 
   group_by(sexo) %>% 
   summarise(num = n())
+
+data_2006_genner_general %>% 
+  ggplot(aes(x = sexo, y = num)) +
+  geom_col() +
+  labs(x='Genero', y='Numero de representantes na eleição')
 
 parties_with_more_candidates_2006 = data_2006 %>% 
   group_by(partido) %>% 
@@ -77,7 +83,13 @@ data_2006_genner = data_2006 %>%
   filter(partido %in%  parties_with_more_candidates_2006$partido) %>% 
   group_by(sexo, partido) %>%
   summarise(num = n()) %>% 
-  group_by(partido)
+  ungroup()
+
+## TODO: FIX group by geder and political party
+data_2006_genner %>% 
+  ggplot(aes(x = (partido), y = num)) +
+  geom_col(width = 0.2)
+  labs(x='Genero', y='Numero de representantes na eleição')
 ```
 
 ```{r}
