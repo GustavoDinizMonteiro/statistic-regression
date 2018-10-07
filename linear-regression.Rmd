@@ -52,8 +52,7 @@ Para uma melhor descrição dos tipos das colunas:
 ```{r}
 sapply(eleicoes_data , class)
 ```
-
-
+Agora separamos os conjuntos de dados das duas eleições.
 ```{r}
 # separating data by year
 data_2006 = eleicoes_data %>% 
@@ -63,6 +62,11 @@ data_2010 = eleicoes_data %>%
   filter(ano == 2010)
 ```
 
+Com os dados separados vamos uma exploração inicial de alguns pontos quanto aos dados
+que estão sendo tema de discussão atualmente, como por exemplo, participação femininina, 
+escolaridade e ocupação dos candidatos além da origem da verba de suas campanhas.
+
+Primeiramente vamos falar da participação feminina, com os numeros gerais das eleições.
 ```{r}
 # analyzing the participation by gender
 data_2006_genner_general = data_2006 %>% 
@@ -73,7 +77,9 @@ data_2006_genner_general %>%
   ggplot(aes(x = sexo, y = num)) +
   geom_col() +
   labs(x='Genero', y='Numero de representantes na eleição')
-
+```
+E agora por cada um dos pricipais partidos também em esfera nacional.
+```{r}
 parties_with_more_candidates_2006 = data_2006 %>% 
   group_by(partido) %>% 
   summarise(num = n()) %>% 
@@ -91,18 +97,39 @@ data_2006_genner %>%
   geom_col(width = 0.2)
   labs(x='Genero', y='Numero de representantes na eleição')
 ```
+Como podemos ver, tanto em números gerais quanto para todos os partidos apresentados
 
+
+Agora falando sobre o grau de escolaridade dos candidatos, em numeros gerais da eleição.
 ```{r}
 # escolaridade
 schooling = data_2006 %>% 
   group_by(grau) %>% 
   summarise(num = n())
 
-accupation = data_2006 %>% 
+schooling %>% 
+  ggplot(aes(x = reorder(grau, num), y = num)) +
+  geom_col() +
+  coord_flip()
+```
+Vemos que maioria dos candidatos estão em um nível de entre ensino médio completo e ensino superior completo, o que pode parecer até uma noticia animadora.
+
+Agora vemos as mais comuns ocupações dos cadidatos.
+```{r}
+accupation = data_2006 %>%
+  filter(ocupacao != "OUTROS") %>% 
   group_by(ocupacao) %>% 
   summarise(num = n()) %>% 
   top_n(10, num)
+
+accupation %>% 
+  ggplot(aes(x = reorder(ocupacao, num), y = num)) +
+  geom_col() +
+  coord_flip()
 ```
+Vemos que maioria dos cadidatos são advogados ou empresários, remetendo a uma dominancia das classes 
+mais bem afortunadas da sociedade, além de uma grande participação de politicos que já se declaram 
+estritamente politicos.
 
 ```{r}
 paries_with_more_money_2006 = data_2006 %>% 
@@ -113,7 +140,7 @@ paries_with_more_money_2006 = data_2006 %>%
     donations = sum(recursos_de_pessoas_fisicas) + sum(recursos_de_pessoas_juridicas),
     by_people = sum(recursos_de_pessoas_fisicas),
     by_companies = sum(recursos_de_pessoas_juridicas)) %>% 
-  top_n(10, total) 
+  top_n(10, total)
 
 ```
 
