@@ -46,6 +46,9 @@ eleicoes_data <- read_csv(
 
 Uma breve amostra sobre os dados: 
 ```{r}
+eleicoes_data %>% 
+  glimpse()
+
 sample_n(eleicoes_data %>%  select(ano, nome, uf, partido), 7)
 ```
 Para uma melhor descrição dos tipos das colunas:
@@ -78,6 +81,7 @@ data_2006_genner_general %>%
   geom_col() +
   labs(x='Genero', y='Numero de representantes na eleição')
 ```
+
 E agora por cada um dos pricipais partidos também em esfera nacional.
 ```{r}
 parties_with_more_candidates_2006 = data_2006 %>% 
@@ -142,5 +146,58 @@ paries_with_more_money_2006 = data_2006 %>%
     by_companies = sum(recursos_de_pessoas_juridicas)) %>% 
   top_n(10, total)
 
+```
+
+
+Agora, apresentados os dados, vamos tabalhar em uma regressão linear para explicar o numero 
+de votos que o candidato conseguiu, e atráves disso, responder a uma série de perguntas que 
+serão apresentadas no decorrer desse estudo.
+
+Como primeira pergunta proposta,
+## Um modelo de regressão múltipla com todas as variáveis é plausível para explicar a variação em y (número de votos) em 2006? Mesma pergunta para 2010.
+
+Primeiramente vamos transformar todas as variáveis qualitativas em fatores, e depois novamente separar
+os dados em dois conjuntos, um para cada uma das eleições.
+```{r}
+eleicoes_data = eleicoes_data %>% 
+  mutate(uf = as.factor(uf),
+         nome = as.factor(nome),
+         sexo = as.factor(sexo),
+         grau = as.factor(grau),
+         nome = as.factor(nome),
+         cargo = as.factor(cargo),
+         partido = as.factor(partido),
+         ocupacao = as.factor(ocupacao),
+         estado_civil = as.factor(estado_civil),
+         sequencial_candidato = as.numeric(sequencial_candidato))
+
+data_2006 = eleicoes_data %>%
+   filter(ano == 2006)
+
+data_2010 = eleicoes_data %>% 
+  filter(ano == 2010)
+```
+
+Agora temos os conjuntos de dados com os seguintes datatypes em suas colunas
+```{r}
+data_scaled %>%
+  glimpse()
+```
+
+Agora vamos criar o conjunto de treino, para iniciarmos a modelagem da função linear,
+criando primeiramente uma semente para que o estudo possa ser reproduzido com os 
+mesmo resultados.
+```{r}
+set.seed(1)      # for reproducible example
+
+data_scaled$id <- 1:nrow(data_scaled)
+```
+
+E agora gerando o conjunto de testes, com 60% dos dados, os outros 40% serão usasdo 
+futuramente para geração dos conjuntos de validação e testes.
+
+```{r}
+training_data = data_scaled %>% 
+  sample_frac(.6)
 ```
 
