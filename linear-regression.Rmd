@@ -12,6 +12,7 @@ output:
 library(dataPreparation)
 library(tidyverse)
 library(GGally)
+library(caret)
 library(broom)
 library(here)
 
@@ -428,5 +429,125 @@ model_2006 %>%
   ggtitle("Residual vs Leverage Plot (2006 elections)") + 
   scale_size_continuous("Cook's Distance", range=c(1,5)) +    
   theme(legend.position="bottom")
+```
+
+```{r}
+predictions <- model_2006 %>% predict(validate_data_2006)
+
+data.frame( R2 = R2(predictions, validate_data_2006$votos),
+            RMSE = RMSE(predictions, validate_data_2006$votos),
+            MAE = MAE(predictions, validate_data_2006$votos),
+            ERR = RMSE(predictions, validate_data_2006$votos)/
+                  mean(validate_data_2006$votos))
+
+predictions <- model_2010 %>% predict(validate_data_2010)
+
+data.frame( R2 = R2(predictions, validate_data_2010$votos),
+            RMSE = RMSE(predictions, validate_data_2010$votos),
+            MAE = MAE(predictions, validate_data_2010$votos),
+            ERR = RMSE(predictions, validate_data_2010$votos)/
+              mean(validate_data_2010$votos))
+
+predictions <- model_2006 %>% predict(testing_data_2006)
+
+data.frame( R2 = R2(predictions, testing_data_2006$votos),
+            RMSE = RMSE(predictions, testing_data_2006$votos),
+            MAE = MAE(predictions, testing_data_2006$votos),
+            ERR = RMSE(predictions, testing_data_2006$votos)/
+              mean(testing_data_2006$votos))
+
+predictions <- model_2010 %>% predict(testing_data_2010)
+
+data.frame( R2 = R2(predictions, testing_data_2010$votos),
+            RMSE = RMSE(predictions, testing_data_2010$votos),
+            MAE = MAE(predictions, testing_data_2010$votos),
+            ERR = RMSE(predictions, testing_data_2010$votos)/
+              mean(testing_data_2010$votos))
+```
+
+
+```{r}
+mod_2006 <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_juridicas,
+          data = training_data_2006)
+
+glance(mod_2006)
+```
+
+```{r}
+mod_2006 %>%
+  ggplot(aes(.fitted, .resid)) + 
+  geom_point() +
+  stat_smooth(method="loess") + 
+  geom_hline(col="red",
+             yintercept=0,
+             linetype="dashed") + 
+  labs(y="Residuals",
+       x="Fitted values",
+       title="Residual vs Fitted Plot (2006 elections)")
+```
+
+```{r}
+mod_2006 %>%
+  ggplot(aes(sample=rstandard(.))) +
+  stat_qq(na.rm = TRUE,
+          shape=1,size=3) +      # open circles
+  labs(title="Normal Q-Q (2006 elections)",        # plot title
+  x="Theoretical Quantiles",      # x-axis label
+  y="Standardized Residuals") +   # y-axis label +
+  geom_abline(color = "red",
+              size = 0.8,
+              linetype="dashed")  # dashed reference line
+```
+
+```{r}
+mod_2006 %>%
+  ggplot(aes(.fitted, 
+             sqrt(abs(.stdresid)))) + 
+  geom_point(na.rm=TRUE) + 
+  stat_smooth(method="loess",
+              na.rm = TRUE) +
+  labs(title = "Scale-Location (2006 elections)",
+       x= "Fitted Value",
+       y = expression(sqrt("|Standardized residuals|")))
+```
+
+```{r}
+mod_2006 %>%
+  ggplot(aes(.hat, .stdresid)) + 
+  geom_point(aes(size=.cooksd), na.rm=TRUE) +
+  stat_smooth(method="loess", na.rm=TRUE) +
+  xlab("Leverage")+ylab("Standardized Residuals") + 
+  ggtitle("Residual vs Leverage Plot (2006 elections)") + 
+  scale_size_continuous("Cook's Distance", range=c(1,5)) +    
+  theme(legend.position="bottom")
+```
+
+
+```{r}
+mod_2006 %>%
+  ggplot(aes(.hat, .cooksd)) + 
+  geom_point(na.rm=TRUE) + 
+  stat_smooth(method="loess", na.rm=TRUE) + 
+  xlab("Leverage hii")+ylab("Cook's Distance") + 
+  ggtitle("Cook's dist vs Leverage hii/(1-hii) (2006 elections)") + 
+  geom_abline(slope=seq(0,3,0.5), color="gray", linetype="dashed")
+```
+
+```{r}
+predictions <- mod_2006 %>% predict(validate_data_2006)
+
+data.frame( R2 = R2(predictions, validate_data_2006$votos),
+            RMSE = RMSE(predictions, validate_data_2006$votos),
+            MAE = MAE(predictions, validate_data_2006$votos),
+            ERR = RMSE(predictions, validate_data_2006$votos)/
+              mean(validate_data_2006$votos))
+
+predictions <- mod_2006 %>% predict(testing_data_2006)
+
+data.frame( R2 = R2(predictions, testing_data_2006$votos),
+            RMSE = RMSE(predictions, testing_data_2006$votos),
+            MAE = MAE(predictions, testing_data_2006$votos),
+            ERR = RMSE(predictions, testing_data_2006$votos)/
+              mean(testing_data_2006$votos))
 ```
 
