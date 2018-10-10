@@ -11,6 +11,7 @@ output:
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
 library(here)
 library(tidyverse)
+library(broom)
 
 theme_set(theme_gray())
 ```
@@ -180,7 +181,7 @@ data_2010 = eleicoes_data %>%
 
 Agora temos os conjuntos de dados com os seguintes datatypes em suas colunas
 ```{r}
-data_scaled %>%
+data_2006 %>%
   glimpse()
 ```
 
@@ -190,14 +191,53 @@ mesmo resultados.
 ```{r}
 set.seed(1)      # for reproducible example
 
-data_scaled$id <- 1:nrow(data_scaled)
+data_2006$id <- 1:nrow(data_2006)
 ```
 
-E agora gerando o conjunto de testes, com 60% dos dados, os outros 40% serão usasdo 
-futuramente para geração dos conjuntos de validação e testes.
+E agora gerando o conjunto de testes, com 60% dos dados, os outros 40% serão usados 
+para geração dos conjuntos de validação e testes.
 
 ```{r}
-training_data = data_scaled %>% 
+training_data_2006 = data_2006 %>% 
   sample_frac(.6)
+
+testing_data_2006 = anti_join(data_2006, training_data_2006, by = 'id')
 ```
 
+E agora criando um modelo com todas as variáveis.
+```{r}
+model_2006 = lm(votos ~ partido + quantidade_doacoes + quantidade_doadores + total_receita + media_receita
+                + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas
+                + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores
+                + total_despesa +  media_despesa + sexo + grau,
+                data = testing_data_2006)
+```
+
+Agora que temos o modelo pronto, famos fazeer uma pequena análise de suas significancia.
+```{r}
+glance(model_2006)
+```
+Nossa estatistica de R² mostra ser moderada, explicando cerca de 62% da variação dos dados, 
+e tendo um diferença mínima para o R² ajustado, mas ainda pouco satisfatória, tendo em vista 
+a quantidade de variáveis usadas, existe o risco de uma estar atrapalhando outra.
+
+Agora para os dados de 2010
+```{r}
+data_2010$id <- 1:nrow(data_2010)
+
+training_data_2010 = data_2010 %>% 
+  sample_frac(.6)
+
+testing_data_2010 = anti_join(data_2010, training_data_2010, by = 'id')
+
+model_2010 = lm(votos ~ partido + quantidade_doacoes + quantidade_doadores + total_receita + media_receita
+                + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas
+                + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores
+                + total_despesa +  media_despesa + sexo + grau,
+                data = testing_data_2010)
+
+glance(model_2010)
+```
+
+Vemos que, para os dados de 2010, o modelo com todas as variáveis se torna ainda menos representativo,
+explicando cerca de 54% da mudança nos dados, e com um R² ajustado bem próximo disso, então acho que podemos considerar que o modelo com todas as variáveis não seria válido para esses dados.
