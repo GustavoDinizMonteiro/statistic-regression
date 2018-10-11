@@ -11,6 +11,7 @@ output:
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
 library(here)
 library(tidyverse)
+library(GGally)
 library(broom)
 
 theme_set(theme_gray())
@@ -168,6 +169,39 @@ parties_with_more_money_2006 %>%
   ggplot(aes(x = reorder(partido, by_companies), y = by_companies)) +
   geom_col() +
   coord_flip()
+```
+
+Por ultimo vamos ter uma visualização da correlação entre as variáveis.
+```{r}
+data_2006 %>%
+  select(-partido,
+         -uf,-nome,
+         -estado_civil,
+         -ocupacao,-ano,
+         -cargo,-grau,-sexo,
+         -sequencial_candidato) %>%
+  na.omit() %>%
+  ggcorr(palette = "RdBu",
+         color = "grey50",
+         label = TRUE, hjust = 1,
+         label_size = 3, size = 4,
+         nbreaks = 5, layout.exp = 7) +
+  ggtitle("Correlation plot for 2006 elections")
+
+data_2010 %>%
+  select(-partido,
+         -uf,-nome,
+         -estado_civil,
+         -ocupacao,-ano,
+         -cargo,-grau,-sexo,
+         -sequencial_candidato) %>%
+  na.omit() %>%
+  ggcorr(palette = "RdBu",
+         color = "grey50",
+         label = TRUE, hjust = 1,
+         label_size = 3, size = 4,
+         nbreaks = 5, layout.exp = 7) +
+  ggtitle("Correlation plot for 2006 elections")
 ```
 
 
