@@ -251,8 +251,8 @@ set.seed(1)      # for reproducible example
 data_2006$id <- 1:nrow(data_2006)
 ```
 
-E agora gerando o conjunto de testes, com 60% dos dados, os outros 40% serão usados 
-para geração dos conjuntos de validação e testes.
+E também um conjunto de testes e outro de validação, com o de treino com 60% dos dados,
+os outros 40% serão usados para geração dos conjuntos de validação e testes.
 
 ```{r}
 training_data_2006 = data_2006 %>% 
@@ -305,7 +305,7 @@ Nossa estatistica de R² mostra ser moderada, explicando cerca de 53% da variaç
 e tendo um diferença mínima para o R² ajustado, o que é muito pouco satisfatória, tendo em vista 
 a quantidade de variáveis usadas, existe o risco de uma estar atrapalhando outra.
 
-Agora para os dados de 2010
+Agora fazemos o mesmo processo para os dados de 2010
 ```{r}
 data_2010$id <- 1:nrow(data_2010)
 
@@ -356,57 +356,93 @@ explicando cerca de 63% da mudança nos dados, e com um R² ajustado bem próxim
 Pórem, uma análise embasada somento no R² e R² ajustado pode estar nos levando a uma opinião muito inocente sobre o modelo,
 então, a seguir, faremos uma série de outras análises em cima do modelo, para podermos ter uma opinião mais fortemente embasado sobre sua eficacia.
 
+Primeiro vamos ver quais variáveis tiveram um p-valor mais alto, ou seja,
+os que se mostram menos confiáveis.
 ```{r}
 # preditores com p valor alto
 tidy(model_2006, 
      conf.int = TRUE, 
-     conf.level = 0.97) %>%
+     conf.level = .97) %>%
   top_n(3, p.value) %>% 
   ggplot(aes(reorder(term, p.value), p.value)) +
   geom_point() +
-  labs(x = "Predictor variable",
-       y = "Estimated value (97% of confidence)")
+  labs(x = "Variable",
+       y = "Estimation (97% of confidence)")
+```
 
+E agora, no extremo contrário, as variáveis com p-valor mais baixo.
+```{r}
 # preditores com um p valor baixo
 tidy(model_2006, 
      conf.int = TRUE, 
-     conf.level = 0.97,
-     sep=":") %>%
+     conf.level = 0.97) %>%
   arrange(p.value) %>%
   slice(1:3) %>%
-  ggplot(aes(reorder(term,p.value), p.value)) +
-  geom_hline(yintercept = 0.05, colour = "darkred") +
-  geom_point(size = 2) +
+  ggplot(aes(reorder(term, p.value), p.value)) +
+  geom_hline(yintercept = 0.05) +
+  geom_point(size = 3.5) +
   labs(x = "Predictor variable",
-       y = "Estimated value (95% of confidence)")
+       y = "Estimated value (97% of confidence)")
 ```
 
-Análise de resuduos
+E agora para os dados de 2010, primeiramente para p-valor alto
 
+```{r}
+tidy(model_2010, 
+     conf.int = TRUE, 
+     conf.level = .97) %>%
+  top_n(3, p.value) %>% 
+  ggplot(aes(reorder(term, p.value), p.value)) +
+  geom_point() +
+  labs(x = "Variable",
+       y = "Estimation (97% of confidence)")
+```
+
+e agora, p-valor baixo
+```{r}
+tidy(model_2010, 
+     conf.int = TRUE, 
+     conf.level = 0.97) %>%
+  arrange(p.value) %>%
+  slice(1:3) %>%
+  ggplot(aes(reorder(term, p.value), p.value)) +
+  geom_hline(yintercept = 0.05) +
+  geom_point(size = 3.5) +
+  labs(x = "Predictor variable",
+       y = "Estimated value (97% of confidence)")
+```
+
+# Análise de resíduos
 ```{r}
 model_2006 %>%
   ggplot(aes(.fitted, .resid)) + 
   geom_point() +
   stat_smooth(method="loess") + 
   geom_hline(col="red",
-             yintercept=0,
+             yintercept = 0,
              linetype="dashed") + 
   labs(y="Residuals",
        x="Fitted values",
-       title="Residual vs Fitted Plot (2006 elections)")
+       title="Residual vs Fitted Plot (2006)")
+```
 
+```{r}
 model_2010 %>%
   ggplot(aes(.fitted, .resid)) + 
   geom_point() +
   stat_smooth(method="loess") + 
   geom_hline(col="red",
-             yintercept=0,
+             yintercept = 0,
              linetype="dashed") + 
   labs(y="Residuals",
        x="Fitted values",
-       title="Residual vs Fitted Plot (2006 elections)")
+       title="Residual vs Fitted Plot (2010)")
 ```
 
+Para ambos os conjuntos de dados, vemos que a distribuição dos pontos não é aleatoria
+nem igualmente distribuida ao longo do eixo x, o que pode mostrar que o modelo pode não estar 
+considerando relações não lineares, ou indicar que variáveis que seriam importantes ao modelo 
+não foram incluidas.
 
 ```{r}
 model_2006 %>%
@@ -415,10 +451,26 @@ model_2006 %>%
   geom_point(na.rm=TRUE) + 
   stat_smooth(method="loess",
               na.rm = TRUE) +
-  labs(title = "Scale-Location (2006 elections)",
+  labs(title = "Scale-Location (2006)",
        x= "Fitted Value",
        y = expression(sqrt("|Standardized residuals|")))
 ```
+
+```{r}
+model_2010 %>%
+  ggplot(aes(.fitted, 
+             sqrt(abs(.stdresid)))) + 
+  geom_point(na.rm=TRUE) + 
+  stat_smooth(method="loess",
+              na.rm = TRUE) +
+  labs(title = "Scale-Location (2010)",
+       x= "Fitted Value",
+       y = expression(sqrt("|Standardized residuals|")))
+```
+
+Novamente, ambos o modelos não mostram homocedasticidade e mostrarem um certo padrão, pode não estar 
+considerando variáveis que são as reais responsáveis pela votação de um candidato, ou o excesso
+de variáveis que podem estar atrapalhando o modelo, além do erro irredutivel.
 
 ```{r}
 model_2006 %>%
@@ -426,10 +478,24 @@ model_2006 %>%
   geom_point(aes(size=.cooksd), na.rm=TRUE) +
   stat_smooth(method="loess", na.rm=TRUE) +
   xlab("Leverage")+ylab("Standardized Residuals") + 
-  ggtitle("Residual vs Leverage Plot (2006 elections)") + 
+  ggtitle("Residual vs Leverage Plot (2006)") + 
   scale_size_continuous("Cook's Distance", range=c(1,5)) +    
   theme(legend.position="bottom")
 ```
+
+```{r}
+model_2010 %>%
+  ggplot(aes(.hat, .stdresid)) + 
+  geom_point(aes(size=.cooksd), na.rm=TRUE) +
+  stat_smooth(method="loess", na.rm=TRUE) +
+  xlab("Leverage") +
+  ylab("Standardized Residuals") + 
+  ggtitle("Residual vs Leverage Plot (2010)") + 
+  scale_size_continuous("Cook's Distance", range=c(1,5)) +    
+  theme(legend.position="bottom")
+```
+
+Para mabas as eleições vemos muitos valores com distancias de cook muito altas, o que mostra o o modelo é distoante com muitos dos valores, o que pode nos dizer que o modelo é bom, pois existem muitos dados que se mostram grandes influenciadores do modelo, mesmo quando a modelagem pode os ver como ouliers.
 
 ```{r}
 predictions <- model_2006 %>% predict(validate_data_2006)
@@ -440,14 +506,6 @@ data.frame( R2 = R2(predictions, validate_data_2006$votos),
             ERR = RMSE(predictions, validate_data_2006$votos)/
                   mean(validate_data_2006$votos))
 
-predictions <- model_2010 %>% predict(validate_data_2010)
-
-data.frame( R2 = R2(predictions, validate_data_2010$votos),
-            RMSE = RMSE(predictions, validate_data_2010$votos),
-            MAE = MAE(predictions, validate_data_2010$votos),
-            ERR = RMSE(predictions, validate_data_2010$votos)/
-              mean(validate_data_2010$votos))
-
 predictions <- model_2006 %>% predict(testing_data_2006)
 
 data.frame( R2 = R2(predictions, testing_data_2006$votos),
@@ -455,6 +513,17 @@ data.frame( R2 = R2(predictions, testing_data_2006$votos),
             MAE = MAE(predictions, testing_data_2006$votos),
             ERR = RMSE(predictions, testing_data_2006$votos)/
               mean(testing_data_2006$votos))
+```
+
+
+```{r}
+predictions <- model_2010 %>% predict(validate_data_2010)
+
+data.frame( R2 = R2(predictions, validate_data_2010$votos),
+            RMSE = RMSE(predictions, validate_data_2010$votos),
+            MAE = MAE(predictions, validate_data_2010$votos),
+            ERR = RMSE(predictions, validate_data_2010$votos)/
+              mean(validate_data_2010$votos))
 
 predictions <- model_2010 %>% predict(testing_data_2010)
 
@@ -483,20 +552,7 @@ mod_2006 %>%
              linetype="dashed") + 
   labs(y="Residuals",
        x="Fitted values",
-       title="Residual vs Fitted Plot (2006 elections)")
-```
-
-```{r}
-mod_2006 %>%
-  ggplot(aes(sample=rstandard(.))) +
-  stat_qq(na.rm = TRUE,
-          shape=1,size=3) +      # open circles
-  labs(title="Normal Q-Q (2006 elections)",        # plot title
-  x="Theoretical Quantiles",      # x-axis label
-  y="Standardized Residuals") +   # y-axis label +
-  geom_abline(color = "red",
-              size = 0.8,
-              linetype="dashed")  # dashed reference line
+       title="Residual vs Fitted Plot (2006)")
 ```
 
 ```{r}
@@ -516,22 +572,13 @@ mod_2006 %>%
   ggplot(aes(.hat, .stdresid)) + 
   geom_point(aes(size=.cooksd), na.rm=TRUE) +
   stat_smooth(method="loess", na.rm=TRUE) +
-  xlab("Leverage")+ylab("Standardized Residuals") + 
-  ggtitle("Residual vs Leverage Plot (2006 elections)") + 
+  xlab("Leverage") + 
+  ylab("Standardized Residuals") + 
+  ggtitle("Residual vs Leverage Plot (2006)") + 
   scale_size_continuous("Cook's Distance", range=c(1,5)) +    
   theme(legend.position="bottom")
 ```
 
-
-```{r}
-mod_2006 %>%
-  ggplot(aes(.hat, .cooksd)) + 
-  geom_point(na.rm=TRUE) + 
-  stat_smooth(method="loess", na.rm=TRUE) + 
-  xlab("Leverage hii")+ylab("Cook's Distance") + 
-  ggtitle("Cook's dist vs Leverage hii/(1-hii) (2006 elections)") + 
-  geom_abline(slope=seq(0,3,0.5), color="gray", linetype="dashed")
-```
 
 ```{r}
 predictions <- mod_2006 %>% predict(validate_data_2006)
