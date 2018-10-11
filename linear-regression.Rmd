@@ -561,6 +561,10 @@ data.frame( R2 = R2(predictions, testing_data_2006$votos),
               mean(testing_data_2006$votos))
 ```
 
+O modelo conseguiu um R² de 0,57, isso significa que esse modelo explica aproximadamente 57% da variabilidade da variável resposta.
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 28340,5 issod quer dizer que o modelo erraria aproximadamente 28340, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 29326 mais/menos do que deveríamos
+A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 15924.48.
+A taxa de erro de previsão (ERR) foi de 1.109683.
 
 ```{r}
 predictions <- model_2010 %>% predict(validate_data_2010)
@@ -580,7 +584,12 @@ data.frame( R2 = R2(predictions, testing_data_2010$votos),
               mean(testing_data_2010$votos))
 ```
 
-Agora vamos construir um modelo apenas com as variáveis jugadas como importantes pela análise de correlação
+O modelo conseguiu um R² de 0,56, isso significa que esse modelo explica aproximadamente 57% da variabilidade da variável resposta.
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 29604.97 issod quer dizer que o modelo erraria aproximadamente 29604, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 29326 mais/menos do que deveríamos
+A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 14371.57.
+A taxa de erro de previsão (ERR) foi de 1.399707.
+
+Agora vamos construir um modelo apenas com as variáveis que foram jugadas como importantes pela análise de correlação
 e medição do p-valor.
 
 >2006
@@ -640,14 +649,6 @@ mod_2006 %>%
 Vemos também valores bem menores para distancia de cook e para bem menos pontos distoantes, o que pode nos dizer que o modelo se encontra em conformidade considerável com os dados.
 
 ```{r}
-predictions <- mod_2006 %>% predict(validate_data_2006)
-
-data.frame( R2 = R2(predictions, validate_data_2006$votos),
-            RMSE = RMSE(predictions, validate_data_2006$votos),
-            MAE = MAE(predictions, validate_data_2006$votos),
-            ERR = RMSE(predictions, validate_data_2006$votos)/
-              mean(validate_data_2006$votos))
-
 predictions <- mod_2006 %>% predict(testing_data_2006)
 
 data.frame( R2 = R2(predictions, testing_data_2006$votos),
@@ -656,6 +657,26 @@ data.frame( R2 = R2(predictions, testing_data_2006$votos),
             ERR = RMSE(predictions, testing_data_2006$votos)/
               mean(testing_data_2006$votos))
 ```
+
+O modelo conseguiu um R² de 0,48, isso significa que esse modelo explica aproximadamente 48% da variabilidade da variável resposta.
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 30105.75 issod quer dizer que o modelo erraria aproximadamente 30105, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 30105 mais/menos do que deveríamos
+A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 12779.06.
+A taxa de erro de previsão (ERR) foi de 1.399249.
+
+```{r}
+predictions <- mod_2006 %>% predict(validate_data_2006)
+
+data.frame( R2 = R2(predictions, validate_data_2006$votos),
+            RMSE = RMSE(predictions, validate_data_2006$votos),
+            MAE = MAE(predictions, validate_data_2006$votos),
+            ERR = RMSE(predictions, validate_data_2006$votos)/
+              mean(validate_data_2006$votos))
+```
+
+O modelo conseguiu um R² de 0,71, isso significa que esse modelo explica aproximadamente 71% da variabilidade da variável resposta.
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 23389.79 issod quer dizer que o modelo erraria aproximadamente 29604, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 29326 mais/menos do que deveríamos
+A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 12379.08
+A taxa de erro de previsão (ERR) foi de 0.9158357.
 
 ```{r}
 mod_2010 <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_juridicas,
