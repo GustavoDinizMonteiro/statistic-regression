@@ -495,7 +495,7 @@ model_2010 %>%
   theme(legend.position="bottom")
 ```
 
-Para mabas as eleições vemos muitos valores com distancias de cook muito altas, o que mostra o o modelo é distoante com muitos dos valores, o que pode nos dizer que o modelo é bom, pois existem muitos dados que se mostram grandes influenciadores do modelo, mesmo quando a modelagem pode os ver como ouliers.
+Para ambas as eleições vemos muitos valores com distancias de cook muito altas, o que mostra o o modelo é distoante com muitos dos valores, o que pode nos dizer que o modelo é bom, pois existem muitos dados que se mostram grandes influenciadores do modelo, mesmo quando a modelagem pode os ver como ouliers.
 
 ```{r}
 predictions <- model_2006 %>% predict(validate_data_2006)
@@ -534,13 +534,15 @@ data.frame( R2 = R2(predictions, testing_data_2010$votos),
               mean(testing_data_2010$votos))
 ```
 
-
+Agora vamos construir um modelo apenas com as variáveis jugadas como importantes.
 ```{r}
 mod_2006 <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_juridicas,
           data = training_data_2006)
 
 glance(mod_2006)
 ```
+
+E ver aplicado a ele os mesmos processos de análise de qualidade que aplicamos ao anterior
 
 ```{r}
 mod_2006 %>%
@@ -555,6 +557,9 @@ mod_2006 %>%
        title="Residual vs Fitted Plot (2006)")
 ```
 
+Vemos que o novo modelo acomoda melhor a distribuição dos dados em tono do eixo x, mais ainda não de 
+forma tão satisfatória, tendo mais pontos para um lado que para outro, e um lado mais espalhado que o outro,
+isso pode indicar a falta de alguma variável importante no modelo.
 ```{r}
 mod_2006 %>%
   ggplot(aes(.fitted, 
@@ -566,6 +571,8 @@ mod_2006 %>%
        x= "Fitted Value",
        y = expression(sqrt("|Standardized residuals|")))
 ```
+Novamente, o modelo mostra certa homocedasticidade mas tem também os problemas coma aleatoriedade, tendo em vista que os pontos não são distribuidos igualmente, algo que pode estar não só atrelado ao erro irredutivel, mas ainda sim, mostra uma melhora significativa se comparado ao modelo com todas as variáveis.
+
 
 ```{r}
 mod_2006 %>%
@@ -579,6 +586,7 @@ mod_2006 %>%
   theme(legend.position="bottom")
 ```
 
+Vemos também valores bem menores para distancia de cook e para bem menos pontos distoantes, o que pode nos dizer que o modelo se encontra em conformidade considerável com os dados.
 
 ```{r}
 predictions <- mod_2006 %>% predict(validate_data_2006)
