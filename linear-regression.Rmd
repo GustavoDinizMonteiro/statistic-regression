@@ -72,15 +72,14 @@ escolaridade e ocupação dos candidatos além da origem da verba de suas campan
 
 Primeiramente vamos falar da participação feminina, com os numeros gerais das eleições.
 ```{r}
-# analyzing the participation by gender
-data_2006_genner_general = data_2006 %>% 
-  group_by(sexo) %>% 
-  summarise(num = n())
-
-data_2006_genner_general %>% 
-  ggplot(aes(x = sexo, y = num)) +
-  geom_col() +
-  labs(x='Genero', y='Numero de representantes na eleição')
+eleicoes_data %>%
+  group_by(sexo, ano) %>%
+  summarize(n = n()) %>%
+  ggplot(aes(reorder(sexo,n), n)) +
+  geom_bar(stat = "identity") + 
+  labs(x="Gender", 
+       y="Absolute Count") +
+  facet_grid(. ~ano)
 ```
 
 E agora por cada um dos pricipais partidos também em esfera nacional.
@@ -90,17 +89,15 @@ parties_with_more_candidates_2006 = data_2006 %>%
   summarise(num = n()) %>% 
   top_n(5, num)
 
-data_2006_genner = data_2006 %>% 
+data_2006 %>% 
   filter(partido %in%  parties_with_more_candidates_2006$partido) %>% 
-  group_by(sexo, partido) %>%
+  group_by(partido, sexo) %>%
   summarise(num = n()) %>% 
-  ungroup()
-
-## TODO: FIX group by geder and political party
-data_2006_genner %>% 
-  ggplot(aes(x = (partido), y = num)) +
-  geom_col(width = 0.2)
-  labs(x='Genero', y='Numero de representantes na eleição')
+  ggplot(aes(reorder(sexo, num), num)) +
+  geom_bar(stat = "identity") + 
+  labs(x="Gender", 
+       y="Absolute Count") +
+  facet_grid(. ~partido)
 ```
 Como podemos ver, tanto em números gerais quanto para todos os partidos apresentados
 
@@ -137,7 +134,7 @@ mais bem afortunadas da sociedade, além de uma grande participação de politic
 estritamente politicos.
 
 ```{r}
-paries_with_more_money_2006 = data_2006 %>% 
+parties_with_more_money_2006 = data_2006 %>% 
   group_by(partido) %>% 
   summarise(
     total = sum(total_receita), 
@@ -145,8 +142,32 @@ paries_with_more_money_2006 = data_2006 %>%
     donations = sum(recursos_de_pessoas_fisicas) + sum(recursos_de_pessoas_juridicas),
     by_people = sum(recursos_de_pessoas_fisicas),
     by_companies = sum(recursos_de_pessoas_juridicas)) %>% 
-  top_n(10, total)
+  top_n(5, total)
 
+parties_with_more_money_2006 %>% 
+  ggplot(aes(x = reorder(partido, total), y = total)) +
+  geom_col() +
+  coord_flip()
+
+parties_with_more_money_2006 %>% 
+  ggplot(aes(x = reorder(partido, self), y = self)) +
+  geom_col() +
+  coord_flip()
+
+parties_with_more_money_2006 %>% 
+  ggplot(aes(x = reorder(partido, donations), y = donations)) +
+  geom_col() +
+  coord_flip()
+
+parties_with_more_money_2006 %>% 
+  ggplot(aes(x = reorder(partido, by_people), y = by_people)) +
+  geom_col() +
+  coord_flip()
+
+parties_with_more_money_2006 %>% 
+  ggplot(aes(x = reorder(partido, by_companies), y = by_companies)) +
+  geom_col() +
+  coord_flip()
 ```
 
 
