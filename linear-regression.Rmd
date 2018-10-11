@@ -9,10 +9,11 @@ output:
 ---
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
-library(here)
+library(dataPreparation)
 library(tidyverse)
 library(GGally)
 library(broom)
+library(here)
 
 theme_set(theme_gray())
 ```
@@ -256,15 +257,42 @@ para geração dos conjuntos de validação e testes.
 training_data_2006 = data_2006 %>% 
   sample_frac(.6)
 
-testing_data_2006 = anti_join(data_2006, training_data_2006, by = 'id')
+encoding <- build_encoding(dataSet = training_data_2006,
+                           cols = c("uf","sexo","grau",
+                                    "partido","estado_civil"),
+                           verbose = F)
+
+training_data_2006 <- one_hot_encoder(dataSet = training_data_2006,
+                           encoding = encoding,
+                           drop = TRUE,
+                           verbose = F)
+
+remaining_2006 = anti_join(data_2006, training_data_2006, by = 'id')
+
+testing_data_2006 = remaining_2006 %>% 
+  sample_frac(.5)
+
+testing_data_2006 <- one_hot_encoder(dataSet = testing_data_2006,
+                           encoding = encoding,
+                           drop = TRUE,
+                           verbose = F)
+
+validate_data_2006 = anti_join(remaining_2006, testing_data_2006, by = 'id')
+
+validate_data_2006 <- one_hot_encoder(dataSet = validate_data_2006,
+                           encoding = encoding,
+                           drop = TRUE,
+                           verbose = F)
+
+rm(remaining_2006)
 ```
 
 E agora criando um modelo com todas as variáveis.
 ```{r}
-model_2006 = lm(votos ~ partido + quantidade_doacoes + quantidade_doadores + total_receita + media_receita
+model_2006 = lm(votos ~ partido.PSDB + partido.PT + quantidade_doacoes + quantidade_doadores + total_receita + media_receita
                 + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas
                 + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores
-                + total_despesa +  media_despesa + sexo + grau,
+                + total_despesa +  media_despesa + sexo.MASCULINO + `grau.SUPERIOR COMPLETO` + sexo.FEMININO,
                 data = testing_data_2006)
 ```
 
@@ -272,8 +300,8 @@ Agora que temos o modelo pronto, famos fazeer uma pequena análise de suas signi
 ```{r}
 glance(model_2006)
 ```
-Nossa estatistica de R² mostra ser moderada, explicando cerca de 62% da variação dos dados, 
-e tendo um diferença mínima para o R² ajustado, mas ainda pouco satisfatória, tendo em vista 
+Nossa estatistica de R² mostra ser moderada, explicando cerca de 53% da variação dos dados, 
+e tendo um diferença mínima para o R² ajustado, o que é muito pouco satisfatória, tendo em vista 
 a quantidade de variáveis usadas, existe o risco de uma estar atrapalhando outra.
 
 Agora para os dados de 2010
@@ -283,16 +311,43 @@ data_2010$id <- 1:nrow(data_2010)
 training_data_2010 = data_2010 %>% 
   sample_frac(.6)
 
-testing_data_2010 = anti_join(data_2010, training_data_2010, by = 'id')
+encoding <- build_encoding(dataSet = training_data_2010,
+                           cols = c("uf","sexo","grau",
+                                    "partido","estado_civil"),
+                           verbose = F)
 
-model_2010 = lm(votos ~ partido + quantidade_doacoes + quantidade_doadores + total_receita + media_receita
+training_data_2010 <- one_hot_encoder(dataSet = training_data_2010,
+                           encoding = encoding,
+                           drop = TRUE,
+                           verbose = F)
+
+remaining_2010 = anti_join(data_2010, training_data_2010, by = 'id')
+
+testing_data_2010 = remaining_2010 %>% 
+  sample_frac(.5)
+
+testing_data_2010 <- one_hot_encoder(dataSet = testing_data_2010,
+                           encoding = encoding,
+                           drop = TRUE,
+                           verbose = F)
+
+validate_data_2010 = anti_join(remaining_2010, testing_data_2010, by = 'id')
+
+validate_data_2010 <- one_hot_encoder(dataSet = validate_data_2010,
+                           encoding = encoding,
+                           drop = TRUE,
+                           verbose = F)
+
+rm(remaining_2010)
+
+model_2010 = lm(votos ~ partido.PSDB + partido.PT + quantidade_doacoes + quantidade_doadores + total_receita + media_receita
                 + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas
                 + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores
-                + total_despesa +  media_despesa + sexo + grau,
+                + total_despesa +  media_despesa + sexo.MASCULINO + `grau.SUPERIOR COMPLETO` + sexo.FEMININO,
                 data = testing_data_2010)
 
 glance(model_2010)
 ```
 
-Vemos que, para os dados de 2010, o modelo com todas as variáveis se torna ainda menos representativo,
-explicando cerca de 54% da mudança nos dados, e com um R² ajustado bem próximo disso, então acho que podemos considerar que o modelo com todas as variáveis não seria válido para esses dados.
+Vemos que, para os dados de 2010, o modelo com todas as variáveis se torna um pouco mais representativo,
+explicando cerca de 63% da mudança nos dados, e com um R² ajustado bem próximo disso, então acho que podemos considerar que o modelo com todas as variáveis não seria válido para esses dados.
