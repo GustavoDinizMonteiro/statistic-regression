@@ -3,9 +3,13 @@ title: "Usando Regressão Linear para Explicar a votação de Deputados"
 author: "Gustavo Monteiro"
 date: "October 3, 2018"
 output:
-  prettydoc::html_pretty:
-    theme: architect
-    highlight: github
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_float: yes
+  html_notebook:
+    toc: yes
+    toc_float: yes
 ---
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
@@ -715,5 +719,106 @@ data.frame( R2 = R2(predictions, testing_data_2010$votos),
             MAE = MAE(predictions, testing_data_2010$votos),
             ERR = RMSE(predictions, testing_data_2010$votos)/
               mean(testing_data_2010$votos))
+```
+
+```{r}
+mod <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_juridicas,
+          data = eleicoes_data)
+
+glance(mod)
+```
+
+```{r}
+mod %>%
+  ggplot(aes(.fitted, .resid)) + 
+  geom_point() +
+  stat_smooth(method="loess") + 
+  geom_hline(col="red",
+             yintercept=0,
+             linetype="dashed") + 
+  labs(y="Residuals",
+       x="Fitted values",
+       title="Residual vs Fitted Plot")
+```
+
+```{r}
+mod %>%
+  ggplot(aes(.fitted, 
+             sqrt(abs(.stdresid)))) + 
+  geom_point(na.rm=TRUE) + 
+  stat_smooth(method="loess",
+              na.rm = TRUE) +
+  labs(title = "Scale-Location",
+       x= "Fitted Value",
+       y = expression(sqrt("|Standardized residuals|")))
+```
+
+```{r}
+mod %>%
+  ggplot(aes(.hat, .stdresid)) + 
+  geom_point(aes(size=.cooksd), na.rm=TRUE) +
+  stat_smooth(method="loess", na.rm=TRUE) +
+  xlab("Leverage") + 
+  ylab("Standardized Residuals") + 
+  ggtitle("Residual vs Leverage Plot") + 
+  scale_size_continuous("Cook's Distance", range=c(1,5)) +    
+  theme(legend.position="bottom")
+```
+
+```{r}
+eleicoes_data$id <- 1:nrow(eleicoes_data)
+
+training_data = eleicoes_data %>% 
+  sample_frac(.6)
+
+encoding <- build_encoding(dataSet = training_data,
+                           cols = c("uf","sexo","grau",
+                                    "partido","estado_civil"),
+                           verbose = F)
+
+training_data <- one_hot_encoder(dataSet = training_data,
+                           encoding = encoding,
+                           drop = TRUE,
+                           verbose = F)
+
+remaining = anti_join(eleicoes_data, training_data, by = 'id')
+
+testing_data = remaining %>% 
+  sample_frac(.5)
+
+testing_data <- one_hot_encoder(dataSet = testing_data,
+                           encoding = encoding,
+                           drop = TRUE,
+                           verbose = F)
+
+validate_data = anti_join(remaining, testing_data, by = 'id')
+
+validate_data <- one_hot_encoder(dataSet = validate_data,
+                           encoding = encoding,
+                           drop = TRUE,
+                           verbose = F)
+
+rm(remaining)
+```
+
+```{r}
+predictions <- mod %>% predict(validate_data)
+
+data.frame( R2 = R2(predictions, validate_data$votos),
+            RMSE = RMSE(predictions, validate_data$votos),
+            MAE = MAE(predictions, validate_data$votos),
+            ERR = RMSE(predictions, validate_data$votos)/
+              mean(validate_data$votos))
+```
+
+
+```{r}
+predictions <- mod %>% predict(testing_data)
+
+data.frame( R2 = R2(predictions, testing_data$votos),
+            RMSE = RMSE(predictions, testing_data$votos),
+            MAE = MAE(predictions, testing_data$votos),
+            ERR = RMSE(predictions, testing_data$votos)/
+              mean(testing_data$votos))
 ```
 
