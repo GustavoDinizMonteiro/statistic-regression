@@ -10,6 +10,7 @@ output:
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
 library(dataPreparation)
+library(gridExtra)
 library(tidyverse)
 library(GGally)
 library(caret)
@@ -19,7 +20,7 @@ library(here)
 theme_set(theme_gray())
 ```
 
-A base de dados que será usada nesse estudo consiste em dados sobre as votações que candidatos à Câmara Federal de Deputados receberam nos anos de 2006 e 2010, além de informações sobre arreadação de campanha, partido, escolaridade, etc.. dos mesmos.
+> A base de dados que será usada nesse estudo consiste em dados sobre as votações que candidatos à Câmara Federal de Deputados receberam nos anos de 2006 e 2010 (fonte: http://www.tse.jus.br), além de informações sobre arreadação de campanha, partido, escolaridade, etc.. dos mesmos.
 
 A seguir uma breve decrição sobre os campos disponiveis para cada registro na base de dados.
 ```{r}
@@ -97,7 +98,7 @@ data_2006 %>%
   group_by(partido, sexo) %>%
   summarise(num = n()) %>% 
   ggplot(aes(reorder(sexo, num), num)) +
-  geom_bar(stat = "identity") + 
+  geom_col(stat = "identity") +
   labs(x="Gender", 
        y="Absolute Count") +
   facet_grid(. ~partido)
@@ -115,6 +116,8 @@ schooling = data_2006 %>%
 schooling %>% 
   ggplot(aes(x = reorder(grau, num), y = num)) +
   geom_col() +
+    labs(x="Degree of schooling", 
+       y="Absolute Count") +
   coord_flip()
 ```
 Vemos que maioria dos candidatos estão em um nível de entre ensino médio completo e ensino superior completo, o que pode parecer até uma noticia animadora.
@@ -130,6 +133,8 @@ accupation = data_2006 %>%
 accupation %>% 
   ggplot(aes(x = reorder(ocupacao, num), y = num)) +
   geom_col() +
+  labs(x="Occupation", 
+       y="Absolute Count") +
   coord_flip()
 ```
 Vemos que maioria dos cadidatos são advogados ou empresários, remetendo a uma dominancia das classes 
@@ -147,30 +152,47 @@ parties_with_more_money_2006 = data_2006 %>%
     by_companies = sum(recursos_de_pessoas_juridicas)) %>% 
   top_n(5, total)
 
-parties_with_more_money_2006 %>% 
+p1 <- parties_with_more_money_2006 %>% 
   ggplot(aes(x = reorder(partido, total), y = total)) +
   geom_col() +
+      labs(x="Party", 
+       y="Amount") +
+  labs(title = "Partidos com mais dinheiro") +
   coord_flip()
 
-parties_with_more_money_2006 %>% 
+p2 <- parties_with_more_money_2006 %>% 
   ggplot(aes(x = reorder(partido, self), y = self)) +
   geom_col() +
+        labs(x="Party", 
+       y="Amount") +
+  labs(title = "Os com mais dinheiro próprio") +
   coord_flip()
 
-parties_with_more_money_2006 %>% 
+p3 <- parties_with_more_money_2006 %>% 
   ggplot(aes(x = reorder(partido, donations), y = donations)) +
   geom_col() +
+        labs(x="Party", 
+       y="Amount") +
+  labs(title = "Os com mais dinheiro doado") +
   coord_flip()
 
-parties_with_more_money_2006 %>% 
+p4 <- parties_with_more_money_2006 %>% 
   ggplot(aes(x = reorder(partido, by_people), y = by_people)) +
   geom_col() +
+        labs(x="Party", 
+       y="Amount") +
+  labs(title = "Com mais dinheiro doado por pessoas") +
   coord_flip()
 
-parties_with_more_money_2006 %>% 
+p5 <- parties_with_more_money_2006 %>% 
   ggplot(aes(x = reorder(partido, by_companies), y = by_companies)) +
   geom_col() +
+        labs(x="Party", 
+       y="Amount") +
+  labs(title = "Os com mais dinheiro doado por empresas") +
   coord_flip()
+
+grid.arrange(p1, p2, p3, p4, p5, nrow = 3)
 ```
 
 Por ultimo vamos ter uma visualização da correlação entre as variáveis.
@@ -203,7 +225,7 @@ data_2010 %>%
          label = TRUE, hjust = 1,
          label_size = 3, size = 4,
          nbreaks = 5, layout.exp = 7) +
-  ggtitle("Correlation plot for 2006 elections")
+  ggtitle("Correlation plot for 2010 elections")
 ```
 
 
@@ -212,7 +234,10 @@ de votos que o candidato conseguiu, e atráves disso, responder a uma série de 
 serão apresentadas no decorrer desse estudo.
 
 Como primeira pergunta proposta,
+
 ## Um modelo de regressão múltipla com todas as variáveis é plausível para explicar a variação em y (número de votos) em 2006? Mesma pergunta para 2010.
+
+Para responder essa pergunta, passaremos não somente pela criação e simples avaliação de um modelo, mas também pela análise de residuas e validação, nesse caminho, algumas outras questões serão respondidas, serão destacadas para o leitor, para que não hajam dúvidas.
 
 Primeiramente vamos transformar todas as variáveis qualitativas em fatores, e depois novamente separar
 os dados em dois conjuntos, um para cada uma das eleições.
@@ -293,7 +318,12 @@ E agora criando um modelo com todas as variáveis.
 model_2006 = lm(votos ~ partido.PSDB + partido.PT + quantidade_doacoes + quantidade_doadores + total_receita + media_receita
                 + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas
                 + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores
-                + total_despesa +  media_despesa + sexo.MASCULINO + `grau.SUPERIOR COMPLETO` + sexo.FEMININO,
+                + total_despesa +  media_despesa + sexo.MASCULINO + `grau.SUPERIOR COMPLETO` + sexo.FEMININO
+                + `grau.ENSINO FUNDAMENTAL COMPLETO` + `grau.ENSINO FUNDAMENTAL INCOMPLETO` + `grau.ENSINO MÉDIO COMPLETO`
+                + `grau.ENSINO MÉDIO INCOMPLETO` + `grau.LÊ E ESCREVE` + `grau.SUPERIOR INCOMPLETO` + partido.DEM
+                + `partido.PC do B` + `partido.PDT` + partido.PHS + partido.PMDB + partido.PP + partido.PPS + partido.PR
+                + partido.PSB + partido.PSL + partido.PSOL + partido.PTB + partido.PV + estado.civil.CASADO.A. + estado.civil.DIVORCIADO.A.
+                + `estado.civil.SEPARADO.A. JUDICIALMENTE` + `estado.civil.SOLTEIRO.A.` + `estado.civil.VIÚVO.A.`,
                 data = testing_data_2006)
 ```
 
@@ -301,7 +331,7 @@ Agora que temos o modelo pronto, famos fazeer uma pequena análise de suas signi
 ```{r}
 glance(model_2006)
 ```
-Nossa estatistica de R² mostra ser moderada, explicando cerca de 53% da variação dos dados, 
+Nossa estatistica de R² mostra ser moderada, explicando cerca de 54% da variação dos dados, 
 e tendo um diferença mínima para o R² ajustado, o que é muito pouco satisfatória, tendo em vista 
 a quantidade de variáveis usadas, existe o risco de uma estar atrapalhando outra.
 
@@ -344,17 +374,26 @@ rm(remaining_2010)
 model_2010 = lm(votos ~ partido.PSDB + partido.PT + quantidade_doacoes + quantidade_doadores + total_receita + media_receita
                 + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas
                 + recursos_proprios + recursos_de_partido_politico + quantidade_despesas + quantidade_fornecedores
-                + total_despesa +  media_despesa + sexo.MASCULINO + `grau.SUPERIOR COMPLETO` + sexo.FEMININO,
+                + total_despesa +  media_despesa + sexo.MASCULINO + `grau.SUPERIOR COMPLETO` + sexo.FEMININO
+                + `grau.ENSINO FUNDAMENTAL COMPLETO` + `grau.ENSINO FUNDAMENTAL INCOMPLETO` + `grau.ENSINO MÉDIO COMPLETO`
+                + `grau.ENSINO MÉDIO INCOMPLETO` + `grau.LÊ E ESCREVE` + `grau.SUPERIOR INCOMPLETO` + partido.DEM
+                + `partido.PC do B` + `partido.PDT` + partido.PHS + partido.PMDB + partido.PP + partido.PPS + partido.PR
+                + partido.PSB + partido.PSL + partido.PSOL + partido.PTB + partido.PV + estado.civil.CASADO.A. + estado.civil.DIVORCIADO.A.
+                + `estado.civil.SEPARADO.A. JUDICIALMENTE` + `estado.civil.SOLTEIRO.A.` + `estado.civil.VIÚVO.A.`,
                 data = testing_data_2010)
 
 glance(model_2010)
 ```
 
 Vemos que, para os dados de 2010, o modelo com todas as variáveis se torna um pouco mais representativo,
-explicando cerca de 63% da mudança nos dados, e com um R² ajustado bem próximo disso, então acho que podemos considerar que o modelo com todas as variáveis não seria válido para esses dados.
+explicando cerca de 64% da mudança nos dados, e com um R² ajustado bem próximo disso, então acho que podemos considerar que o modelo com todas as variáveis não seria válido para esses dados.
 
 Pórem, uma análise embasada somento no R² e R² ajustado pode estar nos levando a uma opinião muito inocente sobre o modelo,
 então, a seguir, faremos uma série de outras análises em cima do modelo, para podermos ter uma opinião mais fortemente embasado sobre sua eficacia.
+
+Então, vamos ter um breve visão para uma das nossas perguntas.
+
+> Quais variáveis conseguem explicar melhor o número de votos? Compare essas variáveis entre os modelos. Mesma coisa para as variáveis menos explicativas.
 
 Primeiro vamos ver quais variáveis tiveram um p-valor mais alto, ou seja,
 os que se mostram menos confiáveis.
@@ -381,7 +420,7 @@ tidy(model_2006,
   ggplot(aes(reorder(term, p.value), p.value)) +
   geom_hline(yintercept = 0.05) +
   geom_point(size = 3.5) +
-  labs(x = "Predictor variable",
+  labs(x = "Variable",
        y = "Estimated value (97% of confidence)")
 ```
 
@@ -408,9 +447,12 @@ tidy(model_2010,
   ggplot(aes(reorder(term, p.value), p.value)) +
   geom_hline(yintercept = 0.05) +
   geom_point(size = 3.5) +
-  labs(x = "Predictor variable",
+  labs(x = "Variable",
        y = "Estimated value (97% of confidence)")
 ```
+Nos gráficos acima, podemos perceber em linhas gerais que variáveis ligadas ao montante de dinheiro que
+os partidos investem eu suas campanhas parecem mais seguramente relacionadas ao número de vostos adquiridos
+em ambas as campanhas, com a excessão da presensa da variável partido-PR para 2010, e como variáveis suspeitas de não terem relação com o número de votos estão as relacionadas com qual o partido politico e escolaridade do cadidato, juntamente com seu estado civil, que se torna menos importante ainda, nas eleições de 2010.
 
 # Análise de resíduos
 ```{r}
@@ -534,7 +576,11 @@ data.frame( R2 = R2(predictions, testing_data_2010$votos),
               mean(testing_data_2010$votos))
 ```
 
-Agora vamos construir um modelo apenas com as variáveis jugadas como importantes.
+Agora vamos construir um modelo apenas com as variáveis jugadas como importantes pela análise de correlação
+e medição do p-valor.
+
+>2006
+
 ```{r}
 mod_2006 <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_juridicas,
           data = training_data_2006)
@@ -567,10 +613,11 @@ mod_2006 %>%
   geom_point(na.rm=TRUE) + 
   stat_smooth(method="loess",
               na.rm = TRUE) +
-  labs(title = "Scale-Location (2006 elections)",
+  labs(title = "Scale-Location (2006)",
        x= "Fitted Value",
        y = expression(sqrt("|Standardized residuals|")))
 ```
+
 Novamente, o modelo mostra certa homocedasticidade mas tem também os problemas coma aleatoriedade, tendo em vista que os pontos não são distribuidos igualmente, algo que pode estar não só atrelado ao erro irredutivel, mas ainda sim, mostra uma melhora significativa se comparado ao modelo com todas as variáveis.
 
 
@@ -604,5 +651,69 @@ data.frame( R2 = R2(predictions, testing_data_2006$votos),
             MAE = MAE(predictions, testing_data_2006$votos),
             ERR = RMSE(predictions, testing_data_2006$votos)/
               mean(testing_data_2006$votos))
+```
+
+```{r}
+mod_2010 <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_juridicas,
+          data = training_data_2010)
+
+glance(mod_2010)
+```
+
+```{r}
+mod_2010 %>%
+  ggplot(aes(.fitted, .resid)) + 
+  geom_point() +
+  stat_smooth(method="loess") + 
+  geom_hline(col="red",
+             yintercept=0,
+             linetype="dashed") + 
+  labs(y="Residuals",
+       x="Fitted values",
+       title="Residual vs Fitted Plot (2010)")
+```
+
+
+```{r}
+mod_2010 %>%
+  ggplot(aes(.fitted, 
+             sqrt(abs(.stdresid)))) + 
+  geom_point(na.rm=TRUE) + 
+  stat_smooth(method="loess",
+              na.rm = TRUE) +
+  labs(title = "Scale-Location (2006 elections)",
+       x= "Fitted Value",
+       y = expression(sqrt("|Standardized residuals|")))
+```
+
+
+```{r}
+mod_2010 %>%
+  ggplot(aes(.hat, .stdresid)) + 
+  geom_point(aes(size=.cooksd), na.rm=TRUE) +
+  stat_smooth(method="loess", na.rm=TRUE) +
+  xlab("Leverage") + 
+  ylab("Standardized Residuals") + 
+  ggtitle("Residual vs Leverage Plot (2006)") + 
+  scale_size_continuous("Cook's Distance", range=c(1,5)) +    
+  theme(legend.position="bottom")
+```
+
+```{r}
+predictions <- mod_2010 %>% predict(validate_data_2010)
+
+data.frame( R2 = R2(predictions, validate_data_2010$votos),
+            RMSE = RMSE(predictions, validate_data_2010$votos),
+            MAE = MAE(predictions, validate_data_2010$votos),
+            ERR = RMSE(predictions, validate_data_2010$votos)/
+              mean(validate_data_2010$votos))
+
+predictions <- mod_2010 %>% predict(testing_data_2010)
+
+data.frame( R2 = R2(predictions, testing_data_2010$votos),
+            RMSE = RMSE(predictions, testing_data_2010$votos),
+            MAE = MAE(predictions, testing_data_2010$votos),
+            ERR = RMSE(predictions, testing_data_2010$votos)/
+              mean(testing_data_2010$votos))
 ```
 
