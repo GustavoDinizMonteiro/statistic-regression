@@ -26,10 +26,9 @@ theme_set(theme_gray())
 
 > A base de dados que será usada nesse estudo consiste em dados sobre as votações que candidatos à Câmara Federal de Deputados receberam nos anos de 2006 e 2010 (fonte: http://www.tse.jus.br), além de informações sobre arreadação de campanha, partido, escolaridade, etc.. dos mesmos.
 
-A seguir uma breve decrição sobre os campos disponiveis para cada registro na base de dados.
+# Descrição dos dados
+## A seguir uma breve decrição sobre os campos disponiveis para cada registro na base de dados.
 ```{r}
-## Loading data with correct data types.
-
 eleicoes_data <- read_csv(
   here('./eleicoes_2006_e_2010.csv'), 
   local= locale("br"),
@@ -53,20 +52,20 @@ eleicoes_data <- read_csv(
     .default = col_character()))
 ```
 
-Uma breve amostra sobre os dados: 
+## Uma breve amostra sobre os dados: 
 ```{r}
 eleicoes_data %>% 
   glimpse()
 
 sample_n(eleicoes_data %>%  select(ano, nome, uf, partido), 7)
 ```
-Para uma melhor descrição dos tipos das colunas:
+## Para uma melhor descrição dos tipos das colunas:
 ```{r}
 sapply(eleicoes_data , class)
 ```
-Agora separamos os conjuntos de dados das duas eleições.
+> Agora separamos os conjuntos de dados das duas eleições.
+
 ```{r}
-# separating data by year
 data_2006 = eleicoes_data %>% 
   filter(ano == 2006)
 
@@ -74,11 +73,11 @@ data_2010 = eleicoes_data %>%
   filter(ano == 2010)
 ```
 
-Com os dados separados vamos uma exploração inicial de alguns pontos quanto aos dados
-que estão sendo tema de discussão atualmente, como por exemplo, participação femininina, 
+> Com os dados separados vamos uma exploração inicial de alguns pontos quanto aos dados
+> que estão sendo tema de discussão atualmente, como por exemplo, participação femininina, 
 escolaridade e ocupação dos candidatos além da origem da verba de suas campanhas.
 
-Primeiramente vamos falar da participação feminina, com os numeros gerais das eleições.
+## Primeiramente vamos falar da participação feminina, com os numeros gerais das eleições.
 ```{r}
 eleicoes_data %>%
   group_by(sexo, ano) %>%
@@ -90,7 +89,7 @@ eleicoes_data %>%
   facet_grid(. ~ano)
 ```
 
-E agora por cada um dos pricipais partidos também em esfera nacional.
+## E agora por cada um dos pricipais partidos também em esfera nacional.
 ```{r}
 parties_with_more_candidates_2006 = data_2006 %>% 
   group_by(partido) %>% 
@@ -109,8 +108,7 @@ data_2006 %>%
 ```
 Como podemos ver, tanto em números gerais quanto para todos os partidos apresentados
 
-
-Agora falando sobre o grau de escolaridade dos candidatos, em numeros gerais da eleição.
+## Agora falando sobre o grau de escolaridade dos candidatos, em numeros gerais da eleição.
 ```{r}
 # escolaridade
 schooling = data_2006 %>% 
@@ -126,7 +124,7 @@ schooling %>%
 ```
 Vemos que maioria dos candidatos estão em um nível de entre ensino médio completo e ensino superior completo, o que pode parecer até uma noticia animadora.
 
-Agora vemos as mais comuns ocupações dos cadidatos.
+## Agora vemos as mais comuns ocupações dos cadidatos.
 ```{r}
 accupation = data_2006 %>%
   filter(ocupacao != "OUTROS") %>% 
@@ -145,6 +143,7 @@ Vemos que maioria dos cadidatos são advogados ou empresários, remetendo a uma 
 mais bem afortunadas da sociedade, além de uma grande participação de politicos que já se declaram 
 estritamente politicos.
 
+## Uma visão das várias fontes das cifras dos partidos
 ```{r}
 parties_with_more_money_2006 = data_2006 %>% 
   group_by(partido) %>% 
@@ -199,7 +198,7 @@ p5 <- parties_with_more_money_2006 %>%
 grid.arrange(p1, p2, p3, p4, p5, nrow = 3)
 ```
 
-Por ultimo vamos ter uma visualização da correlação entre as variáveis.
+## Por ultimo vamos ter uma visualização da correlação entre as variáveis.
 ```{r}
 data_2006 %>%
   select(-partido,
@@ -232,16 +231,17 @@ data_2010 %>%
   ggtitle("Correlation plot for 2010 elections")
 ```
 
-
 Agora, apresentados os dados, vamos tabalhar em uma regressão linear para explicar o numero 
 de votos que o candidato conseguiu, e atráves disso, responder a uma série de perguntas que 
 serão apresentadas no decorrer desse estudo.
 
-Como primeira pergunta proposta,
+# Como primeira pergunta proposta,
 
 ## Um modelo de regressão múltipla com todas as variáveis é plausível para explicar a variação em y (número de votos) em 2006? Mesma pergunta para 2010.
 
-Para responder essa pergunta, passaremos não somente pela criação e simples avaliação de um modelo, mas também pela análise de residuas e validação, nesse caminho, algumas outras questões serão respondidas, serão destacadas para o leitor, para que não hajam dúvidas.
+# Para responder essa pergunta
+
+Passaremos não somente pela criação e simples avaliação de um modelo, mas também pela análise de residuas e validação, nesse caminho, algumas outras questões serão respondidas, serão destacadas para o leitor, para que não hajam dúvidas.
 
 Primeiramente vamos transformar todas as variáveis qualitativas em fatores, e depois novamente separar
 os dados em dois conjuntos, um para cada uma das eleições.
@@ -271,6 +271,8 @@ data_2006 %>%
   glimpse()
 ```
 
+
+## Treino, teste, e validação
 Agora vamos criar o conjunto de treino, para iniciarmos a modelagem da função linear,
 criando primeiramente uma semente para que o estudo possa ser reproduzido com os 
 mesmo resultados.
@@ -317,7 +319,7 @@ validate_data_2006 <- one_hot_encoder(dataSet = validate_data_2006,
 rm(remaining_2006)
 ```
 
-E agora criando um modelo com todas as variáveis.
+# E agora criando um modelo com todas as variáveis.
 ```{r}
 model_2006 = lm(votos ~ partido.PSDB + partido.PT + quantidade_doacoes + quantidade_doadores + total_receita + media_receita
                 + recursos_de_outros_candidatos.comites + recursos_de_pessoas_fisicas + recursos_de_pessoas_juridicas
@@ -339,7 +341,7 @@ Nossa estatistica de R² mostra ser moderada, explicando cerca de 54% da variaç
 e tendo um diferença mínima para o R² ajustado, o que é muito pouco satisfatória, tendo em vista 
 a quantidade de variáveis usadas, existe o risco de uma estar atrapalhando outra.
 
-Agora fazemos o mesmo processo para os dados de 2010
+## Agora fazemos o mesmo processo para os dados de 2010
 ```{r}
 data_2010$id <- 1:nrow(data_2010)
 
@@ -395,7 +397,7 @@ explicando cerca de 64% da mudança nos dados, e com um R² ajustado bem próxim
 Pórem, uma análise embasada somento no R² e R² ajustado pode estar nos levando a uma opinião muito inocente sobre o modelo,
 então, a seguir, faremos uma série de outras análises em cima do modelo, para podermos ter uma opinião mais fortemente embasado sobre sua eficacia.
 
-Então, vamos ter um breve visão para uma das nossas perguntas.
+## Então, vamos ter um breve visão para uma das nossas perguntas.
 
 > Quais variáveis conseguem explicar melhor o número de votos? Compare essas variáveis entre os modelos. Mesma coisa para as variáveis menos explicativas.
 
@@ -454,11 +456,14 @@ tidy(model_2010,
   labs(x = "Variable",
        y = "Estimated value (97% of confidence)")
 ```
+
 Nos gráficos acima, podemos perceber em linhas gerais que variáveis ligadas ao montante de dinheiro que
 os partidos investem eu suas campanhas parecem mais seguramente relacionadas ao número de vostos adquiridos
 em ambas as campanhas, com a excessão da presensa da variável partido-PR para 2010, e como variáveis suspeitas de não terem relação com o número de votos estão as relacionadas com qual o partido politico e escolaridade do cadidato, juntamente com seu estado civil, que se torna menos importante ainda, nas eleições de 2010.
 
 # Análise de resíduos
+
+## Residual vs Fitted
 ```{r}
 model_2006 %>%
   ggplot(aes(.fitted, .resid)) + 
@@ -471,6 +476,8 @@ model_2006 %>%
        x="Fitted values",
        title="Residual vs Fitted Plot (2006)")
 ```
+
+E agora para os dados de 2010
 
 ```{r}
 model_2010 %>%
@@ -490,6 +497,7 @@ nem igualmente distribuida ao longo do eixo x, o que pode mostrar que o modelo p
 considerando relações não lineares, ou indicar que variáveis que seriam importantes ao modelo 
 não foram incluidas.
 
+## Standardized residuals
 ```{r}
 model_2006 %>%
   ggplot(aes(.fitted, 
@@ -518,6 +526,7 @@ Novamente, ambos o modelos não mostram homocedasticidade e mostrarem um certo p
 considerando variáveis que são as reais responsáveis pela votação de um candidato, ou o excesso
 de variáveis que podem estar atrapalhando o modelo, além do erro irredutivel.
 
+## Cook's Distance
 ```{r}
 model_2006 %>%
   ggplot(aes(.hat, .stdresid)) + 
@@ -543,15 +552,8 @@ model_2010 %>%
 
 Para ambas as eleições vemos muitos valores com distancias de cook muito altas, o que mostra o o modelo é distoante com muitos dos valores, o que pode nos dizer que o modelo é bom, pois existem muitos dados que se mostram grandes influenciadores do modelo, mesmo quando a modelagem pode os ver como ouliers.
 
+## Teste 2006
 ```{r}
-predictions <- model_2006 %>% predict(validate_data_2006)
-
-data.frame( R2 = R2(predictions, validate_data_2006$votos),
-            RMSE = RMSE(predictions, validate_data_2006$votos),
-            MAE = MAE(predictions, validate_data_2006$votos),
-            ERR = RMSE(predictions, validate_data_2006$votos)/
-                  mean(validate_data_2006$votos))
-
 predictions <- model_2006 %>% predict(testing_data_2006)
 
 data.frame( R2 = R2(predictions, testing_data_2006$votos),
@@ -561,20 +563,28 @@ data.frame( R2 = R2(predictions, testing_data_2006$votos),
               mean(testing_data_2006$votos))
 ```
 
+O modelo conseguiu um R² de 0,54, isso significa que esse modelo explica aproximadamente 54% da variabilidade da variável resposta.
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 28056.78 isso quer dizer que o modelo erraria aproximadamente 28056, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 28056 mais/menos do que deveríamos
+A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 13190.14.
+A taxa de erro de previsão (ERR) foi de 1.304018.
+
+# Validação 2006
+```{r}
+predictions <- model_2006 %>% predict(validate_data_2006)
+
+data.frame( R2 = R2(predictions, validate_data_2006$votos),
+            RMSE = RMSE(predictions, validate_data_2006$votos),
+            MAE = MAE(predictions, validate_data_2006$votos),
+            ERR = RMSE(predictions, validate_data_2006$votos)/
+                  mean(validate_data_2006$votos))
+```
 O modelo conseguiu um R² de 0,57, isso significa que esse modelo explica aproximadamente 57% da variabilidade da variável resposta.
-A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 28340,5 issod quer dizer que o modelo erraria aproximadamente 28340, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 29326 mais/menos do que deveríamos
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 28340,5 issod quer dizer que o modelo erraria aproximadamente 28340, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 28340 mais/menos do que deveríamos
 A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 15924.48.
 A taxa de erro de previsão (ERR) foi de 1.109683.
 
+## Teste 2010
 ```{r}
-predictions <- model_2010 %>% predict(validate_data_2010)
-
-data.frame( R2 = R2(predictions, validate_data_2010$votos),
-            RMSE = RMSE(predictions, validate_data_2010$votos),
-            MAE = MAE(predictions, validate_data_2010$votos),
-            ERR = RMSE(predictions, validate_data_2010$votos)/
-              mean(validate_data_2010$votos))
-
 predictions <- model_2010 %>% predict(testing_data_2010)
 
 data.frame( R2 = R2(predictions, testing_data_2010$votos),
@@ -584,16 +594,29 @@ data.frame( R2 = R2(predictions, testing_data_2010$votos),
               mean(testing_data_2010$votos))
 ```
 
-O modelo conseguiu um R² de 0,56, isso significa que esse modelo explica aproximadamente 57% da variabilidade da variável resposta.
-A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 29604.97 issod quer dizer que o modelo erraria aproximadamente 29604, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 29326 mais/menos do que deveríamos
+O modelo conseguiu um R² de 0,56, isso significa que esse modelo explica aproximadamente 56% da variabilidade da variável resposta.
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 29604.97 issod quer dizer que o modelo erraria aproximadamente 29604, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 29604 mais/menos do que deveríamos
 A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 14371.57.
 A taxa de erro de previsão (ERR) foi de 1.399707.
 
+## Validação 2010
+```{r}
+predictions <- model_2010 %>% predict(validate_data_2010)
+
+data.frame( R2 = R2(predictions, validate_data_2010$votos),
+            RMSE = RMSE(predictions, validate_data_2010$votos),
+            MAE = MAE(predictions, validate_data_2010$votos),
+            ERR = RMSE(predictions, validate_data_2010$votos)/
+              mean(validate_data_2010$votos))
+```
+O modelo conseguiu um R² de 0,44, isso significa que esse modelo explica aproximadamente 56% da variabilidade da variável resposta.
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 31995.79 issod quer dizer que o modelo erraria aproximadamente 31995, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 31995 mais/menos do que deveríamos
+A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 14931.24.
+A taxa de erro de previsão (ERR) foi de 1.399707.
+
+# Um novo modelo para 2006
 Agora vamos construir um modelo apenas com as variáveis que foram jugadas como importantes pela análise de correlação
 e medição do p-valor.
-
->2006
-
 ```{r}
 mod_2006 <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_juridicas,
           data = training_data_2006)
@@ -601,8 +624,9 @@ mod_2006 <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_jurid
 glance(mod_2006)
 ```
 
-E ver aplicado a ele os mesmos processos de análise de qualidade que aplicamos ao anterior
+## E ver aplicado a ele os mesmos processos de análise de qualidade que aplicamos ao anterior
 
+### Residual vs Fitted
 ```{r}
 mod_2006 %>%
   ggplot(aes(.fitted, .resid)) + 
@@ -619,6 +643,8 @@ mod_2006 %>%
 Vemos que o novo modelo acomoda melhor a distribuição dos dados em tono do eixo x, mais ainda não de 
 forma tão satisfatória, tendo mais pontos para um lado que para outro, e um lado mais espalhado que o outro,
 isso pode indicar a falta de alguma variável importante no modelo.
+
+### Standardized residuals
 ```{r}
 mod_2006 %>%
   ggplot(aes(.fitted, 
@@ -633,7 +659,7 @@ mod_2006 %>%
 
 Novamente, o modelo mostra certa homocedasticidade mas tem também os problemas coma aleatoriedade, tendo em vista que os pontos não são distribuidos igualmente, algo que pode estar não só atrelado ao erro irredutivel, mas ainda sim, mostra uma melhora significativa se comparado ao modelo com todas as variáveis.
 
-
+### Cook's Distance
 ```{r}
 mod_2006 %>%
   ggplot(aes(.hat, .stdresid)) + 
@@ -648,6 +674,7 @@ mod_2006 %>%
 
 Vemos também valores bem menores para distancia de cook e para bem menos pontos distoantes, o que pode nos dizer que o modelo se encontra em conformidade considerável com os dados.
 
+## Teste 2006
 ```{r}
 predictions <- mod_2006 %>% predict(testing_data_2006)
 
@@ -663,6 +690,7 @@ A diferença média entre os valores de resultados conhecidos observados e os va
 A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 12779.06.
 A taxa de erro de previsão (ERR) foi de 1.399249.
 
+## Validação 2006
 ```{r}
 predictions <- mod_2006 %>% predict(validate_data_2006)
 
@@ -678,6 +706,7 @@ A diferença média entre os valores de resultados conhecidos observados e os va
 A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 12379.08
 A taxa de erro de previsão (ERR) foi de 0.9158357.
 
+# Um novo modelo para 2010
 ```{r}
 mod_2010 <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_juridicas,
           data = training_data_2010)
@@ -685,6 +714,7 @@ mod_2010 <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_jurid
 glance(mod_2010)
 ```
 
+## Residual vs Fitted Plot 
 ```{r}
 mod_2010 %>%
   ggplot(aes(.fitted, .resid)) + 
@@ -698,7 +728,7 @@ mod_2010 %>%
        title="Residual vs Fitted Plot (2010)")
 ```
 
-
+## Standardized residuals
 ```{r}
 mod_2010 %>%
   ggplot(aes(.fitted, 
@@ -711,7 +741,7 @@ mod_2010 %>%
        y = expression(sqrt("|Standardized residuals|")))
 ```
 
-
+## Cook's Distance
 ```{r}
 mod_2010 %>%
   ggplot(aes(.hat, .stdresid)) + 
@@ -724,15 +754,8 @@ mod_2010 %>%
   theme(legend.position="bottom")
 ```
 
+## Teste 2010
 ```{r}
-predictions <- mod_2010 %>% predict(validate_data_2010)
-
-data.frame( R2 = R2(predictions, validate_data_2010$votos),
-            RMSE = RMSE(predictions, validate_data_2010$votos),
-            MAE = MAE(predictions, validate_data_2010$votos),
-            ERR = RMSE(predictions, validate_data_2010$votos)/
-              mean(validate_data_2010$votos))
-
 predictions <- mod_2010 %>% predict(testing_data_2010)
 
 data.frame( R2 = R2(predictions, testing_data_2010$votos),
@@ -742,50 +765,21 @@ data.frame( R2 = R2(predictions, testing_data_2010$votos),
               mean(testing_data_2010$votos))
 ```
 
+## Validação 2010
 ```{r}
-mod <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_juridicas,
-          data = eleicoes_data)
+predictions <- mod_2010 %>% predict(validate_data_2010)
 
-glance(mod)
+data.frame( R2 = R2(predictions, validate_data_2010$votos),
+            RMSE = RMSE(predictions, validate_data_2010$votos),
+            MAE = MAE(predictions, validate_data_2010$votos),
+            ERR = RMSE(predictions, validate_data_2010$votos)/
+              mean(validate_data_2010$votos))
 ```
 
-```{r}
-mod %>%
-  ggplot(aes(.fitted, .resid)) + 
-  geom_point() +
-  stat_smooth(method="loess") + 
-  geom_hline(col="red",
-             yintercept=0,
-             linetype="dashed") + 
-  labs(y="Residuals",
-       x="Fitted values",
-       title="Residual vs Fitted Plot")
-```
 
-```{r}
-mod %>%
-  ggplot(aes(.fitted, 
-             sqrt(abs(.stdresid)))) + 
-  geom_point(na.rm=TRUE) + 
-  stat_smooth(method="loess",
-              na.rm = TRUE) +
-  labs(title = "Scale-Location",
-       x= "Fitted Value",
-       y = expression(sqrt("|Standardized residuals|")))
-```
+# Um modelo conjunto
 
-```{r}
-mod %>%
-  ggplot(aes(.hat, .stdresid)) + 
-  geom_point(aes(size=.cooksd), na.rm=TRUE) +
-  stat_smooth(method="loess", na.rm=TRUE) +
-  xlab("Leverage") + 
-  ylab("Standardized Residuals") + 
-  ggtitle("Residual vs Leverage Plot") + 
-  scale_size_continuous("Cook's Distance", range=c(1,5)) +    
-  theme(legend.position="bottom")
-```
-
+Construindo conjuntos de treino teste e validação
 ```{r}
 eleicoes_data$id <- 1:nrow(eleicoes_data)
 
@@ -823,16 +817,53 @@ rm(remaining)
 ```
 
 ```{r}
-predictions <- mod %>% predict(validate_data)
+mod <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_juridicas,
+          data = training_data)
 
-data.frame( R2 = R2(predictions, validate_data$votos),
-            RMSE = RMSE(predictions, validate_data$votos),
-            MAE = MAE(predictions, validate_data$votos),
-            ERR = RMSE(predictions, validate_data$votos)/
-              mean(validate_data$votos))
+glance(mod)
 ```
 
+## Residual vs Fitted
+```{r}
+mod %>%
+  ggplot(aes(.fitted, .resid)) + 
+  geom_point() +
+  stat_smooth(method="loess") + 
+  geom_hline(col="red",
+             yintercept=0,
+             linetype="dashed") + 
+  labs(y="Residuals",
+       x="Fitted values",
+       title="Residual vs Fitted Plot")
+```
 
+## Standardized residuals
+```{r}
+mod %>%
+  ggplot(aes(.fitted, 
+             sqrt(abs(.stdresid)))) + 
+  geom_point(na.rm=TRUE) + 
+  stat_smooth(method="loess",
+              na.rm = TRUE) +
+  labs(title = "Scale-Location",
+       x= "Fitted Value",
+       y = expression(sqrt("|Standardized residuals|")))
+```
+
+## Cook's Distance
+```{r}
+mod %>%
+  ggplot(aes(.hat, .stdresid)) + 
+  geom_point(aes(size=.cooksd), na.rm=TRUE) +
+  stat_smooth(method="loess", na.rm=TRUE) +
+  xlab("Leverage") + 
+  ylab("Standardized Residuals") + 
+  ggtitle("Residual vs Leverage Plot") + 
+  scale_size_continuous("Cook's Distance", range=c(1,5)) +    
+  theme(legend.position="bottom")
+```
+
+## Teste
 ```{r}
 predictions <- mod %>% predict(testing_data)
 
@@ -841,5 +872,16 @@ data.frame( R2 = R2(predictions, testing_data$votos),
             MAE = MAE(predictions, testing_data$votos),
             ERR = RMSE(predictions, testing_data$votos)/
               mean(testing_data$votos))
+```
+
+## Validação
+```{r}
+predictions <- mod %>% predict(validate_data)
+
+data.frame( R2 = R2(predictions, validate_data$votos),
+            RMSE = RMSE(predictions, validate_data$votos),
+            MAE = MAE(predictions, validate_data$votos),
+            ERR = RMSE(predictions, validate_data$votos)/
+              mean(validate_data$votos))
 ```
 
