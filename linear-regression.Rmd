@@ -106,6 +106,7 @@ data_2006 %>%
        y="Absolute Count") +
   facet_grid(. ~partido)
 ```
+
 Como podemos ver, tanto em números gerais quanto para todos os partidos apresentados
 
 ## Agora falando sobre o grau de escolaridade dos candidatos, em numeros gerais da eleição.
@@ -122,6 +123,7 @@ schooling %>%
        y="Absolute Count") +
   coord_flip()
 ```
+
 Vemos que maioria dos candidatos estão em um nível de entre ensino médio completo e ensino superior completo, o que pode parecer até uma noticia animadora.
 
 ## Agora vemos as mais comuns ocupações dos cadidatos.
@@ -139,6 +141,7 @@ accupation %>%
        y="Absolute Count") +
   coord_flip()
 ```
+
 Vemos que maioria dos cadidatos são advogados ou empresários, remetendo a uma dominancia das classes 
 mais bem afortunadas da sociedade, além de uma grande participação de politicos que já se declaram 
 estritamente politicos.
@@ -235,9 +238,9 @@ Agora, apresentados os dados, vamos tabalhar em uma regressão linear para expli
 de votos que o candidato conseguiu, e atráves disso, responder a uma série de perguntas que 
 serão apresentadas no decorrer desse estudo.
 
-# Como primeira pergunta proposta,
+# Como primeira pergunta proposta
 
-## Um modelo de regressão múltipla com todas as variáveis é plausível para explicar a variação em y (número de votos) em 2006? Mesma pergunta para 2010.
+### Um modelo de regressão múltipla com todas as variáveis é plausível para explicar a variação em y (número de votos) em 2006? Mesma pergunta para 2010.
 
 # Para responder essa pergunta
 
@@ -734,6 +737,7 @@ mod_2010 %>%
        x="Fitted values",
        title="Residual vs Fitted Plot (2010)")
 ```
+
 Vemos que o novo modelo acomoda muito melhor a distribuição dos dados em tono do eixo x, mais ainda não de 
 forma não tão satisfatória, tendo mais pontos para um lado que para outro, e um lado um pouco mais espalhado 
 que o outro, mostrando que o modelo não se ajusta totalmente.
@@ -750,6 +754,7 @@ mod_2010 %>%
        x= "Fitted Value",
        y = expression(sqrt("|Standardized residuals|")))
 ```
+
 O modelo mostra certa homocedasticidade mas tem também os problemas coma aleatoriedade, tendo em vista que os pontos não são distribuidos igualmente, algo que pode estar não só atrelado ao erro irredutivel, mas ainda sim, mostra uma melhora significativa se comparado ao modelo com todas as variáveis.
 
 ## Cook's Distance
@@ -764,6 +769,7 @@ mod_2010 %>%
   scale_size_continuous("Cook's Distance", range=c(1,5)) +    
   theme(legend.position="bottom")
 ```
+
 Vemos também valores extremamente menores para distancia de cook e para bem menos pontos distoantes, o que pode nos dizer que o modelo se encontra em conformidade considerável com os a variação dos dados.
 
 ## Teste 2010
@@ -861,6 +867,7 @@ mod %>%
        x="Fitted values",
        title="Residual vs Fitted Plot")
 ```
+
 Vemos que o novo modelo acomoda bem a distribuição dos dados em tono do eixo x,mesmo que só 
 ocupando a parte central do gráfico a dispersão parae aleatória, o que é um bom sinal.
 
@@ -876,6 +883,7 @@ mod %>%
        x= "Fitted Value",
        y = expression(sqrt("|Standardized residuals|")))
 ```
+
 Nesta análise ele também mostra ter um dispersão parcialmente aleatória, muito concentrada no meio pra cima do gráfico
 
 ## Cook's Distance
@@ -890,6 +898,7 @@ mod %>%
   scale_size_continuous("Cook's Distance", range=c(1,5)) +    
   theme(legend.position="bottom")
 ```
+
 Vemos também valores um pouco altos para distancia de cookmas para poucos pontos, o que pode nos dizer que o modelo se encontra em conformidade considerável com os a variação dos dados.
 
 ## Teste
@@ -906,7 +915,6 @@ O modelo conseguiu um R² de 0,45, isso significa que esse modelo explica aproxi
 A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 37515.32 isso quer dizer que o modelo erraria aproximadamente 37515, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 37515 mais/menos do que deveríamos
 A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 13578.44.	
 A taxa de erro de previsão (ERR) foi de 1.686544.
-
 
 ## Validação
 ```{r}
