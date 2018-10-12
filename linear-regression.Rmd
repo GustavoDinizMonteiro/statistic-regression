@@ -623,8 +623,11 @@ mod_2006 <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_jurid
 
 glance(mod_2006)
 ```
+Nossa estatistica de R² émoderada/baixa, explicando cerca de 50% da variação dos dados, 
+e tendo um diferença mínima para o R² ajustado, o que é pouco satisfatória, porém mais análises podem
+ser feitas.
 
-## E ver aplicado a ele os mesmos processos de análise de qualidade que aplicamos ao anterior
+## Aplicando a ele os mesmos processos de análise de qualidade que aplicamos aos anteriores
 
 ### Residual vs Fitted
 ```{r}
@@ -641,7 +644,7 @@ mod_2006 %>%
 ```
 
 Vemos que o novo modelo acomoda melhor a distribuição dos dados em tono do eixo x, mais ainda não de 
-forma tão satisfatória, tendo mais pontos para um lado que para outro, e um lado mais espalhado que o outro,
+forma não tão satisfatória, tendo mais pontos para um lado que para outro, e um lado mais espalhado que o outro,
 isso pode indicar a falta de alguma variável importante no modelo.
 
 ### Standardized residuals
@@ -672,7 +675,7 @@ mod_2006 %>%
   theme(legend.position="bottom")
 ```
 
-Vemos também valores bem menores para distancia de cook e para bem menos pontos distoantes, o que pode nos dizer que o modelo se encontra em conformidade considerável com os dados.
+Vemos também valores bem menores para distancia de cook e para bem menos pontos distoantes, o que pode nos dizer que o modelo se encontra em conformidade considerável com a variação os dados.
 
 ## Teste 2006
 ```{r}
@@ -713,6 +716,10 @@ mod_2010 <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_jurid
 
 glance(mod_2010)
 ```
+Nossa estatistica de R² baixa, explicando cerca de 46% da variação dos dados, 
+e tendo um diferença mínima para o R² ajustado, o que é pouco satisfatória, porém por ser
+bem mais simples do que a com todas as variáveis alguma diminuição era esperanda, vamos fazer análises de
+residuos então.
 
 ## Residual vs Fitted Plot 
 ```{r}
@@ -727,6 +734,9 @@ mod_2010 %>%
        x="Fitted values",
        title="Residual vs Fitted Plot (2010)")
 ```
+Vemos que o novo modelo acomoda muito melhor a distribuição dos dados em tono do eixo x, mais ainda não de 
+forma não tão satisfatória, tendo mais pontos para um lado que para outro, e um lado um pouco mais espalhado 
+que o outro, mostrando que o modelo não se ajusta totalmente.
 
 ## Standardized residuals
 ```{r}
@@ -736,10 +746,11 @@ mod_2010 %>%
   geom_point(na.rm=TRUE) + 
   stat_smooth(method="loess",
               na.rm = TRUE) +
-  labs(title = "Scale-Location (2006 elections)",
+  labs(title = "Scale-Location (2010)",
        x= "Fitted Value",
        y = expression(sqrt("|Standardized residuals|")))
 ```
+O modelo mostra certa homocedasticidade mas tem também os problemas coma aleatoriedade, tendo em vista que os pontos não são distribuidos igualmente, algo que pode estar não só atrelado ao erro irredutivel, mas ainda sim, mostra uma melhora significativa se comparado ao modelo com todas as variáveis.
 
 ## Cook's Distance
 ```{r}
@@ -753,6 +764,7 @@ mod_2010 %>%
   scale_size_continuous("Cook's Distance", range=c(1,5)) +    
   theme(legend.position="bottom")
 ```
+Vemos também valores extremamente menores para distancia de cook e para bem menos pontos distoantes, o que pode nos dizer que o modelo se encontra em conformidade considerável com os a variação dos dados.
 
 ## Teste 2010
 ```{r}
@@ -764,6 +776,10 @@ data.frame( R2 = R2(predictions, testing_data_2010$votos),
             ERR = RMSE(predictions, testing_data_2010$votos)/
               mean(testing_data_2010$votos))
 ```
+O modelo conseguiu um R² de 0,57, isso significa que esse modelo explica aproximadamente 57% da variabilidade da variável resposta.
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 29194.57 isso quer dizer que o modelo erraria aproximadamente 29194, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 29194 mais/menos do que deveríamos
+A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 11922.71.	
+A taxa de erro de previsão (ERR) foi de 1.380304.
 
 ## Validação 2010
 ```{r}
@@ -776,10 +792,14 @@ data.frame( R2 = R2(predictions, validate_data_2010$votos),
               mean(validate_data_2010$votos))
 ```
 
+O modelo conseguiu um R² de 0.55, isso significa que esse modelo explica aproximadamente 48% da variabilidade da variável resposta.
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 28410.54 issod quer dizer que o modelo erraria aproximadamente 28410, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 28410 mais/menos do que deveríamos
+A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 11804.81.
+A taxa de erro de previsão (ERR) foi de 1.428713.
 
 # Um modelo conjunto
 
-Construindo conjuntos de treino teste e validação
+## Construindo conjuntos de treino teste e validação
 ```{r}
 eleicoes_data$id <- 1:nrow(eleicoes_data)
 
@@ -816,12 +836,17 @@ validate_data <- one_hot_encoder(dataSet = validate_data,
 rm(remaining)
 ```
 
+# Constuindo o modelo
 ```{r}
 mod <- lm(votos ~ total_receita * total_despesa * recursos_de_pessoas_juridicas,
           data = training_data)
 
 glance(mod)
 ```
+
+A estatistica de R² está um pouco baixa, explicando cerca de 48% da variação dos dados, 
+e tendo um diferença mínima para o R² ajustado, o que é pouco satisfatória, vamos agora a análise
+de residuos para termos um panorama mais completos
 
 ## Residual vs Fitted
 ```{r}
@@ -836,6 +861,8 @@ mod %>%
        x="Fitted values",
        title="Residual vs Fitted Plot")
 ```
+Vemos que o novo modelo acomoda bem a distribuição dos dados em tono do eixo x,mesmo que só 
+ocupando a parte central do gráfico a dispersão parae aleatória, o que é um bom sinal.
 
 ## Standardized residuals
 ```{r}
@@ -849,6 +876,7 @@ mod %>%
        x= "Fitted Value",
        y = expression(sqrt("|Standardized residuals|")))
 ```
+Nesta análise ele também mostra ter um dispersão parcialmente aleatória, muito concentrada no meio pra cima do gráfico
 
 ## Cook's Distance
 ```{r}
@@ -862,6 +890,7 @@ mod %>%
   scale_size_continuous("Cook's Distance", range=c(1,5)) +    
   theme(legend.position="bottom")
 ```
+Vemos também valores um pouco altos para distancia de cookmas para poucos pontos, o que pode nos dizer que o modelo se encontra em conformidade considerável com os a variação dos dados.
 
 ## Teste
 ```{r}
@@ -873,6 +902,11 @@ data.frame( R2 = R2(predictions, testing_data$votos),
             ERR = RMSE(predictions, testing_data$votos)/
               mean(testing_data$votos))
 ```
+O modelo conseguiu um R² de 0,45, isso significa que esse modelo explica aproximadamente 57% da variabilidade da variável resposta.
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 37515.32 isso quer dizer que o modelo erraria aproximadamente 37515, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 37515 mais/menos do que deveríamos
+A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 13578.44.	
+A taxa de erro de previsão (ERR) foi de 1.686544.
+
 
 ## Validação
 ```{r}
@@ -885,3 +919,10 @@ data.frame( R2 = R2(predictions, validate_data$votos),
               mean(validate_data$votos))
 ```
 
+O modelo conseguiu um R² de 0,52, isso significa que esse modelo explica aproximadamente 52% da variabilidade da variável resposta.
+A diferença média entre os valores de resultados conhecidos observados e os valores previstos pelo modelo (RMSE) foi de aproximadamente 32477.57 isso quer dizer que o modelo erraria aproximadamente 32477, ou seja, se o candidato tivesse um milhão de votos, nós preveríamos até 32477 mais/menos do que deveríamos
+A diferença absoluta média entre os resultados observados e previstos (MAE) foi de aproximadamente 13833.14.	
+A taxa de erro de previsão (ERR) foi de 
+
+> Com base nesses dados posso afirmar que o modelo é satisfátório, porem pode ser bastante melhorado,
+algumas das suas estatisticas de residuos mostram problemas e seu R² ainda pode ser considerado muito baixo.
