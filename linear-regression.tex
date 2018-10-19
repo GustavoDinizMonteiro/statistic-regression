@@ -1,0 +1,1660 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={Usando Regressão Linear para Explicar a votação de Deputados},
+            pdfauthor={Gustavo Monteiro},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{Usando Regressão Linear para Explicar a votação de Deputados}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{Gustavo Monteiro}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+      \predate{\centering\large\emph}
+  \postdate{\par}
+    \date{October 3, 2018}
+
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\begin{quote}
+A base de dados que será usada nesse estudo consiste em dados sobre as
+votações que candidatos à Câmara Federal de Deputados receberam nos anos
+de 2006 e 2010 (fonte: \url{http://www.tse.jus.br}), além de informações
+sobre arreadação de campanha, partido, escolaridade, etc.. dos mesmos.
+\end{quote}
+
+\section{Descrição dos dados}\label{descricao-dos-dados}
+
+\subsection{A seguir uma breve decrição sobre os campos disponiveis para
+cada registro na base de
+dados.}\label{a-seguir-uma-breve-decricao-sobre-os-campos-disponiveis-para-cada-registro-na-base-de-dados.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{eleicoes_data <-}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}
+  \KeywordTok{here}\NormalTok{(}\StringTok{'./eleicoes_2006_e_2010.csv'}\NormalTok{), }
+  \DataTypeTok{local=} \KeywordTok{locale}\NormalTok{(}\StringTok{"br"}\NormalTok{),}
+  \DataTypeTok{col_types =} \KeywordTok{cols}\NormalTok{(}
+    \DataTypeTok{ano =} \KeywordTok{col_integer}\NormalTok{(), }\CommentTok{# ano de referencia}
+    \DataTypeTok{sequencial_candidato =} \KeywordTok{col_character}\NormalTok{(), }\CommentTok{# id do candidato}
+    \DataTypeTok{quantidade_doacoes =} \KeywordTok{col_integer}\NormalTok{(),}
+    \DataTypeTok{quantidade_doadores =} \KeywordTok{col_integer}\NormalTok{(), }\CommentTok{# número de doadores diferentes}
+    \DataTypeTok{total_receita =} \KeywordTok{col_double}\NormalTok{(), }\CommentTok{# soma em R$ das doações}
+    \DataTypeTok{media_receita =} \KeywordTok{col_double}\NormalTok{(), }\CommentTok{# média das doações}
+    \DataTypeTok{recursos_de_outros_candidatos.comites =} \KeywordTok{col_double}\NormalTok{(), }\CommentTok{# quantia em R$ das doações provenientes de outros candidatos ou comite partidário}
+    \DataTypeTok{recursos_de_pessoas_fisicas =} \KeywordTok{col_double}\NormalTok{(), }\CommentTok{# quantia em R$ das doações provenientes de outros CPFs}
+    \DataTypeTok{recursos_de_pessoas_juridicas =} \KeywordTok{col_double}\NormalTok{(), }\CommentTok{# quantia em R$ das doações provenientes de outros CNPJ}
+    \DataTypeTok{recursos_proprios =} \KeywordTok{col_double}\NormalTok{(), }\CommentTok{# quantia em R$ das doações provenientes do próprio candidato}
+    \StringTok{`}\DataTypeTok{recursos_de_partido_politico}\StringTok{`}\NormalTok{ =}\StringTok{ }\KeywordTok{col_double}\NormalTok{(), }\CommentTok{# quantia em R$ das doações provenientes do partido político do candidato}
+    \DataTypeTok{quantidade_despesas =} \KeywordTok{col_integer}\NormalTok{(),}
+    \DataTypeTok{quantidade_fornecedores =} \KeywordTok{col_integer}\NormalTok{(), }\CommentTok{# número de fornecedores/despesas diferentes}
+    \DataTypeTok{total_despesa =} \KeywordTok{col_double}\NormalTok{(), }\CommentTok{# soma em R$ das despesas de campanha}
+    \DataTypeTok{media_despesa =} \KeywordTok{col_double}\NormalTok{(), }\CommentTok{# média das despesas de campanha}
+    \DataTypeTok{votos =} \KeywordTok{col_integer}\NormalTok{(), }\CommentTok{#  variável alvo. Se refere ao número de votos na campanha de 2006 ou 2010}
+    \DataTypeTok{.default =} \KeywordTok{col_character}\NormalTok{()))}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Uma breve amostra sobre os
+dados:}\label{uma-breve-amostra-sobre-os-dados}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{eleicoes_data }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{glimpse}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Observations: 7,476
+## Variables: 24
+## $ ano                                   <int> 2006, 2006, 2006, 2006, ...
+## $ sequencial_candidato                  <chr> "10001", "10002", "10002...
+## $ nome                                  <chr> "JOSÉ LUIZ NOGUEIRA DE S...
+## $ uf                                    <chr> "AP", "RO", "AP", "MS", ...
+## $ partido                               <chr> "PT", "PT", "PT", "PRONA...
+## $ quantidade_doacoes                    <int> 6, 13, 17, 6, 48, 6, 14,...
+## $ quantidade_doadores                   <int> 6, 13, 16, 6, 48, 6, 7, ...
+## $ total_receita                         <dbl> 16600.00, 22826.00, 1581...
+## $ media_receita                         <dbl> 2766.67, 1755.85, 9301.2...
+## $ recursos_de_outros_candidatos.comites <dbl> 0.00, 6625.00, 2250.00, ...
+## $ recursos_de_pessoas_fisicas           <dbl> 9000.00, 15000.00, 34150...
+## $ recursos_de_pessoas_juridicas         <dbl> 6300.00, 1000.00, 62220....
+## $ recursos_proprios                     <dbl> 1300.00, 201.00, 59500.0...
+## $ recursos_de_partido_politico          <dbl> 0, 0, 0, 0, 0, 0, 0, 0, ...
+## $ quantidade_despesas                   <int> 14, 24, 123, 8, 133, 9, ...
+## $ quantidade_fornecedores               <int> 14, 23, 108, 8, 120, 9, ...
+## $ total_despesa                         <dbl> 16583.60, 20325.99, 1460...
+## $ media_despesa                         <dbl> 1184.54, 846.92, 1187.09...
+## $ cargo                                 <chr> "DEPUTADO FEDERAL", "DEP...
+## $ sexo                                  <chr> "MASCULINO", "FEMININO",...
+## $ grau                                  <chr> "ENSINO MÉDIO COMPLETO",...
+## $ estado_civil                          <chr> "CASADO(A)", "SOLTEIRO(A...
+## $ ocupacao                              <chr> "VEREADOR", "SERVIDOR PÚ...
+## $ votos                                 <int> 8579, 2757, 17428, 1193,...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sample_n}\NormalTok{(eleicoes_data }\OperatorTok{%>%}\StringTok{  }\KeywordTok{select}\NormalTok{(ano, nome, uf, partido), }\DecValTok{7}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 7 x 4
+##     ano nome                              uf    partido
+##   <int> <chr>                             <chr> <chr>  
+## 1  2006 CARLOS JACKSON GUTEMBERG DE SOUSA PI    PFL    
+## 2  2010 FATIMA DA SILVA FERNANDES         SP    PSTU   
+## 3  2006 MILTON ANTÔNIO CASQUEL MONTI      SP    PL     
+## 4  2006 NÉRIO LOURENÇO BIANCHINI          RO    PT     
+## 5  2006 LUIZ PAULO KNISS                  SC    PV     
+## 6  2006 JOÃO BOSCO DE MORAIS              MG    PSOL   
+## 7  2006 MARCELO REVOREDO                  SP    PMN
+\end{verbatim}
+
+\subsection{Para uma melhor descrição dos tipos das
+colunas:}\label{para-uma-melhor-descricao-dos-tipos-das-colunas}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sapply}\NormalTok{(eleicoes_data , class)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                                   ano 
+##                             "integer" 
+##                  sequencial_candidato 
+##                           "character" 
+##                                  nome 
+##                           "character" 
+##                                    uf 
+##                           "character" 
+##                               partido 
+##                           "character" 
+##                    quantidade_doacoes 
+##                             "integer" 
+##                   quantidade_doadores 
+##                             "integer" 
+##                         total_receita 
+##                             "numeric" 
+##                         media_receita 
+##                             "numeric" 
+## recursos_de_outros_candidatos.comites 
+##                             "numeric" 
+##           recursos_de_pessoas_fisicas 
+##                             "numeric" 
+##         recursos_de_pessoas_juridicas 
+##                             "numeric" 
+##                     recursos_proprios 
+##                             "numeric" 
+##          recursos_de_partido_politico 
+##                             "numeric" 
+##                   quantidade_despesas 
+##                             "integer" 
+##               quantidade_fornecedores 
+##                             "integer" 
+##                         total_despesa 
+##                             "numeric" 
+##                         media_despesa 
+##                             "numeric" 
+##                                 cargo 
+##                           "character" 
+##                                  sexo 
+##                           "character" 
+##                                  grau 
+##                           "character" 
+##                          estado_civil 
+##                           "character" 
+##                              ocupacao 
+##                           "character" 
+##                                 votos 
+##                             "integer"
+\end{verbatim}
+
+\begin{quote}
+Agora separamos os conjuntos de dados das duas eleições.
+\end{quote}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data_}\DecValTok{2006}\NormalTok{ =}\StringTok{ }\NormalTok{eleicoes_data }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(ano }\OperatorTok{==}\StringTok{ }\DecValTok{2006}\NormalTok{)}
+
+\NormalTok{data_}\DecValTok{2010}\NormalTok{ =}\StringTok{ }\NormalTok{eleicoes_data }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(ano }\OperatorTok{==}\StringTok{ }\DecValTok{2010}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{quote}
+Com os dados separados vamos uma exploração inicial de alguns pontos
+quanto aos dados que estão sendo tema de discussão atualmente, como por
+exemplo, participação femininina, escolaridade e ocupação dos candidatos
+além da origem da verba de suas campanhas.
+\end{quote}
+
+\subsection{Primeiramente vamos falar da participação feminina, com os
+numeros gerais das
+eleições.}\label{primeiramente-vamos-falar-da-participacao-feminina-com-os-numeros-gerais-das-eleicoes.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{eleicoes_data }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(sexo, ano) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{summarize}\NormalTok{(}\DataTypeTok{n =} \KeywordTok{n}\NormalTok{()) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\KeywordTok{reorder}\NormalTok{(sexo,n), n)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_bar}\NormalTok{(}\DataTypeTok{stat =} \StringTok{"identity"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{"Gender"}\NormalTok{, }
+       \DataTypeTok{y=}\StringTok{"Absolute Count"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_grid}\NormalTok{(. }\OperatorTok{~}\NormalTok{ano)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\subsection{E agora por cada um dos pricipais partidos também em esfera
+nacional.}\label{e-agora-por-cada-um-dos-pricipais-partidos-tambem-em-esfera-nacional.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{parties_with_more_candidates_}\DecValTok{2006}\NormalTok{ =}\StringTok{ }\NormalTok{data_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(partido) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{num =} \KeywordTok{n}\NormalTok{()) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{top_n}\NormalTok{(}\DecValTok{5}\NormalTok{, num)}
+
+\NormalTok{data_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(partido }\OperatorTok{%in%}\StringTok{  }\NormalTok{parties_with_more_candidates_}\DecValTok{2006}\OperatorTok{$}\NormalTok{partido) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(partido, sexo) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{num =} \KeywordTok{n}\NormalTok{()) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\KeywordTok{reorder}\NormalTok{(sexo, num), num)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_col}\NormalTok{(}\DataTypeTok{stat =} \StringTok{"identity"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{"Gender"}\NormalTok{, }
+       \DataTypeTok{y=}\StringTok{"Absolute Count"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_grid}\NormalTok{(. }\OperatorTok{~}\NormalTok{partido)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Ignoring unknown parameters: stat
+\end{verbatim}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+Como podemos ver, tanto em números gerais quanto para todos os partidos
+apresentados
+
+\subsection{Agora falando sobre o grau de escolaridade dos candidatos,
+em numeros gerais da
+eleição.}\label{agora-falando-sobre-o-grau-de-escolaridade-dos-candidatos-em-numeros-gerais-da-eleicao.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# escolaridade}
+\NormalTok{schooling =}\StringTok{ }\NormalTok{data_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(grau) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{num =} \KeywordTok{n}\NormalTok{())}
+
+\NormalTok{schooling }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{reorder}\NormalTok{(grau, num), }\DataTypeTok{y =}\NormalTok{ num)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_col}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{"Degree of schooling"}\NormalTok{, }
+       \DataTypeTok{y=}\StringTok{"Absolute Count"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{coord_flip}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+Vemos que maioria dos candidatos estão em um nível de entre ensino médio
+completo e ensino superior completo, o que pode parecer até uma noticia
+animadora.
+
+\subsection{Agora vemos as mais comuns ocupações dos
+cadidatos.}\label{agora-vemos-as-mais-comuns-ocupacoes-dos-cadidatos.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{accupation =}\StringTok{ }\NormalTok{data_}\DecValTok{2006} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(ocupacao }\OperatorTok{!=}\StringTok{ "OUTROS"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(ocupacao) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{num =} \KeywordTok{n}\NormalTok{()) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{top_n}\NormalTok{(}\DecValTok{10}\NormalTok{, num)}
+
+\NormalTok{accupation }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{reorder}\NormalTok{(ocupacao, num), }\DataTypeTok{y =}\NormalTok{ num)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_col}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{"Occupation"}\NormalTok{, }
+       \DataTypeTok{y=}\StringTok{"Absolute Count"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{coord_flip}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-9-1.pdf}
+
+Vemos que maioria dos cadidatos são advogados ou empresários, remetendo
+a uma dominancia das classes mais bem afortunadas da sociedade, além de
+uma grande participação de politicos que já se declaram estritamente
+politicos.
+
+\subsection{Uma visão das várias fontes das cifras dos
+partidos}\label{uma-visao-das-varias-fontes-das-cifras-dos-partidos}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{parties_with_more_money_}\DecValTok{2006}\NormalTok{ =}\StringTok{ }\NormalTok{data_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(partido) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}
+    \DataTypeTok{total =} \KeywordTok{sum}\NormalTok{(total_receita), }
+    \DataTypeTok{self =} \KeywordTok{sum}\NormalTok{(recursos_proprios) }\OperatorTok{+}\StringTok{ }\KeywordTok{sum}\NormalTok{(recursos_de_partido_politico),}
+    \DataTypeTok{donations =} \KeywordTok{sum}\NormalTok{(recursos_de_pessoas_fisicas) }\OperatorTok{+}\StringTok{ }\KeywordTok{sum}\NormalTok{(recursos_de_pessoas_juridicas),}
+    \DataTypeTok{by_people =} \KeywordTok{sum}\NormalTok{(recursos_de_pessoas_fisicas),}
+    \DataTypeTok{by_companies =} \KeywordTok{sum}\NormalTok{(recursos_de_pessoas_juridicas)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{top_n}\NormalTok{(}\DecValTok{5}\NormalTok{, total)}
+
+\NormalTok{p1 <-}\StringTok{ }\NormalTok{parties_with_more_money_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{reorder}\NormalTok{(partido, total), }\DataTypeTok{y =}\NormalTok{ total)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_col}\NormalTok{() }\OperatorTok{+}
+\StringTok{      }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{"Party"}\NormalTok{, }
+       \DataTypeTok{y=}\StringTok{"Amount"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Parties with more money"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{coord_flip}\NormalTok{()}
+
+\NormalTok{p2 <-}\StringTok{ }\NormalTok{parties_with_more_money_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{reorder}\NormalTok{(partido, self), }\DataTypeTok{y =}\NormalTok{ self)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_col}\NormalTok{() }\OperatorTok{+}
+\StringTok{        }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{"Party"}\NormalTok{, }
+       \DataTypeTok{y=}\StringTok{"Amount"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Parties with more own money"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{coord_flip}\NormalTok{()}
+
+\NormalTok{p3 <-}\StringTok{ }\NormalTok{parties_with_more_money_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{reorder}\NormalTok{(partido, donations), }\DataTypeTok{y =}\NormalTok{ donations)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_col}\NormalTok{() }\OperatorTok{+}
+\StringTok{        }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{"Party"}\NormalTok{, }
+       \DataTypeTok{y=}\StringTok{"Amount"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Parties with more money donated"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{coord_flip}\NormalTok{()}
+
+\NormalTok{p4 <-}\StringTok{ }\NormalTok{parties_with_more_money_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{reorder}\NormalTok{(partido, by_people), }\DataTypeTok{y =}\NormalTok{ by_people)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_col}\NormalTok{() }\OperatorTok{+}
+\StringTok{        }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{"Party"}\NormalTok{, }
+       \DataTypeTok{y=}\StringTok{"Amount"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Parties with more money donated by people"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{coord_flip}\NormalTok{()}
+
+\NormalTok{p5 <-}\StringTok{ }\NormalTok{parties_with_more_money_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =} \KeywordTok{reorder}\NormalTok{(partido, by_companies), }\DataTypeTok{y =}\NormalTok{ by_companies)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_col}\NormalTok{() }\OperatorTok{+}
+\StringTok{        }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x=}\StringTok{"Party"}\NormalTok{, }
+       \DataTypeTok{y=}\StringTok{"Amount"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Parties with more money donated by companies"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{coord_flip}\NormalTok{()}
+
+\KeywordTok{grid.arrange}\NormalTok{(p1, p2, p3, p4, p5, }\DataTypeTok{nrow =} \DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-10-1.pdf}
+
+\subsection{Por ultimo vamos ter uma visualização da correlação entre as
+variáveis.}\label{por-ultimo-vamos-ter-uma-visualizacao-da-correlacao-entre-as-variaveis.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data_}\DecValTok{2006} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\NormalTok{partido,}
+         \OperatorTok{-}\NormalTok{uf,}\OperatorTok{-}\NormalTok{nome,}
+         \OperatorTok{-}\NormalTok{estado_civil,}
+         \OperatorTok{-}\NormalTok{ocupacao,}\OperatorTok{-}\NormalTok{ano,}
+         \OperatorTok{-}\NormalTok{cargo,}\OperatorTok{-}\NormalTok{grau,}\OperatorTok{-}\NormalTok{sexo,}
+         \OperatorTok{-}\NormalTok{sequencial_candidato) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{na.omit}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggcorr}\NormalTok{(}\DataTypeTok{palette =} \StringTok{"RdBu"}\NormalTok{,}
+         \DataTypeTok{color =} \StringTok{"grey50"}\NormalTok{,}
+         \DataTypeTok{label =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{,}
+         \DataTypeTok{label_size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{size =} \DecValTok{4}\NormalTok{,}
+         \DataTypeTok{nbreaks =} \DecValTok{5}\NormalTok{, }\DataTypeTok{layout.exp =} \DecValTok{7}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Correlation plot for 2006 elections"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data_}\DecValTok{2010} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(}\OperatorTok{-}\NormalTok{partido,}
+         \OperatorTok{-}\NormalTok{uf,}\OperatorTok{-}\NormalTok{nome,}
+         \OperatorTok{-}\NormalTok{estado_civil,}
+         \OperatorTok{-}\NormalTok{ocupacao,}\OperatorTok{-}\NormalTok{ano,}
+         \OperatorTok{-}\NormalTok{cargo,}\OperatorTok{-}\NormalTok{grau,}\OperatorTok{-}\NormalTok{sexo,}
+         \OperatorTok{-}\NormalTok{sequencial_candidato) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{na.omit}\NormalTok{() }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggcorr}\NormalTok{(}\DataTypeTok{palette =} \StringTok{"RdBu"}\NormalTok{,}
+         \DataTypeTok{color =} \StringTok{"grey50"}\NormalTok{,}
+         \DataTypeTok{label =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{,}
+         \DataTypeTok{label_size =} \DecValTok{3}\NormalTok{, }\DataTypeTok{size =} \DecValTok{4}\NormalTok{,}
+         \DataTypeTok{nbreaks =} \DecValTok{5}\NormalTok{, }\DataTypeTok{layout.exp =} \DecValTok{7}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Correlation plot for 2010 elections"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-11-2.pdf}
+
+Agora, apresentados os dados, vamos tabalhar em uma regressão linear
+para explicar o numero de votos que o candidato conseguiu, e atráves
+disso, responder a uma série de perguntas que serão apresentadas no
+decorrer desse estudo.
+
+\section{Como primeira pergunta
+proposta}\label{como-primeira-pergunta-proposta}
+
+\subsubsection{Um modelo de regressão múltipla com todas as variáveis é
+plausível para explicar a variação em y (número de votos) em 2006? Mesma
+pergunta para
+2010.}\label{um-modelo-de-regressao-multipla-com-todas-as-variaveis-e-plausivel-para-explicar-a-variacao-em-y-numero-de-votos-em-2006-mesma-pergunta-para-2010.}
+
+\section{Para responder essa
+pergunta}\label{para-responder-essa-pergunta}
+
+Passaremos não somente pela criação e simples avaliação de um modelo,
+mas também pela análise de residuas e validação, nesse caminho, algumas
+outras questões serão respondidas, serão destacadas para o leitor, para
+que não hajam dúvidas.
+
+Primeiramente vamos transformar todas as variáveis qualitativas em
+fatores, e depois novamente separar os dados em dois conjuntos, um para
+cada uma das eleições.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{eleicoes_data =}\StringTok{ }\NormalTok{eleicoes_data }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{uf =} \KeywordTok{as.factor}\NormalTok{(uf),}
+         \DataTypeTok{nome =} \KeywordTok{as.factor}\NormalTok{(nome),}
+         \DataTypeTok{sexo =} \KeywordTok{as.factor}\NormalTok{(sexo),}
+         \DataTypeTok{grau =} \KeywordTok{as.factor}\NormalTok{(grau),}
+         \DataTypeTok{nome =} \KeywordTok{as.factor}\NormalTok{(nome),}
+         \DataTypeTok{cargo =} \KeywordTok{as.factor}\NormalTok{(cargo),}
+         \DataTypeTok{partido =} \KeywordTok{as.factor}\NormalTok{(partido),}
+         \DataTypeTok{ocupacao =} \KeywordTok{as.factor}\NormalTok{(ocupacao),}
+         \DataTypeTok{estado_civil =} \KeywordTok{as.factor}\NormalTok{(estado_civil),}
+         \DataTypeTok{sequencial_candidato =} \KeywordTok{as.numeric}\NormalTok{(sequencial_candidato))}
+
+\NormalTok{data_}\DecValTok{2006}\NormalTok{ =}\StringTok{ }\NormalTok{eleicoes_data }\OperatorTok{%>%}
+\StringTok{   }\KeywordTok{filter}\NormalTok{(ano }\OperatorTok{==}\StringTok{ }\DecValTok{2006}\NormalTok{)}
+
+\NormalTok{data_}\DecValTok{2010}\NormalTok{ =}\StringTok{ }\NormalTok{eleicoes_data }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{filter}\NormalTok{(ano }\OperatorTok{==}\StringTok{ }\DecValTok{2010}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Agora temos os conjuntos de dados com os seguintes datatypes em suas
+colunas
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data_}\DecValTok{2006} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{glimpse}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Observations: 3,436
+## Variables: 24
+## $ ano                                   <int> 2006, 2006, 2006, 2006, ...
+## $ sequencial_candidato                  <dbl> 10001, 10002, 10002, 100...
+## $ nome                                  <fct> JOSÉ LUIZ NOGUEIRA DE SO...
+## $ uf                                    <fct> AP, RO, AP, MS, RO, PI, ...
+## $ partido                               <fct> PT, PT, PT, PRONA, PT, P...
+## $ quantidade_doacoes                    <int> 6, 13, 17, 6, 48, 6, 14,...
+## $ quantidade_doadores                   <int> 6, 13, 16, 6, 48, 6, 7, ...
+## $ total_receita                         <dbl> 16600.00, 22826.00, 1581...
+## $ media_receita                         <dbl> 2766.67, 1755.85, 9301.2...
+## $ recursos_de_outros_candidatos.comites <dbl> 0.00, 6625.00, 2250.00, ...
+## $ recursos_de_pessoas_fisicas           <dbl> 9000.00, 15000.00, 34150...
+## $ recursos_de_pessoas_juridicas         <dbl> 6300.00, 1000.00, 62220....
+## $ recursos_proprios                     <dbl> 1300.00, 201.00, 59500.0...
+## $ recursos_de_partido_politico          <dbl> 0, 0, 0, 0, 0, 0, 0, 0, ...
+## $ quantidade_despesas                   <int> 14, 24, 123, 8, 133, 9, ...
+## $ quantidade_fornecedores               <int> 14, 23, 108, 8, 120, 9, ...
+## $ total_despesa                         <dbl> 16583.60, 20325.99, 1460...
+## $ media_despesa                         <dbl> 1184.54, 846.92, 1187.09...
+## $ cargo                                 <fct> DEPUTADO FEDERAL, DEPUTA...
+## $ sexo                                  <fct> MASCULINO, FEMININO, FEM...
+## $ grau                                  <fct> ENSINO MÉDIO COMPLETO, S...
+## $ estado_civil                          <fct> CASADO(A), SOLTEIRO(A), ...
+## $ ocupacao                              <fct> VEREADOR, SERVIDOR PÚBLI...
+## $ votos                                 <int> 8579, 2757, 17428, 1193,...
+\end{verbatim}
+
+\subsection{Treino, teste, e validação}\label{treino-teste-e-validacao}
+
+Agora vamos criar o conjunto de treino, para iniciarmos a modelagem da
+função linear, criando primeiramente uma semente para que o estudo possa
+ser reproduzido com os mesmo resultados.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)      }\CommentTok{# for reproducible example}
+
+\NormalTok{data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{id <-}\StringTok{ }\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(data_}\DecValTok{2006}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+E também um conjunto de testes e outro de validação, com o de treino com
+60\% dos dados, os outros 40\% serão usados para geração dos conjuntos
+de validação e testes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{training_data_}\DecValTok{2006}\NormalTok{ =}\StringTok{ }\NormalTok{data_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{sample_frac}\NormalTok{(.}\DecValTok{6}\NormalTok{)}
+
+\NormalTok{encoding <-}\StringTok{ }\KeywordTok{build_encoding}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ training_data_}\DecValTok{2006}\NormalTok{,}
+                           \DataTypeTok{cols =} \KeywordTok{c}\NormalTok{(}\StringTok{"uf"}\NormalTok{,}\StringTok{"sexo"}\NormalTok{,}\StringTok{"grau"}\NormalTok{,}
+                                    \StringTok{"partido"}\NormalTok{,}\StringTok{"estado_civil"}\NormalTok{),}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\NormalTok{training_data_}\DecValTok{2006}\NormalTok{ <-}\StringTok{ }\KeywordTok{one_hot_encoder}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ training_data_}\DecValTok{2006}\NormalTok{,}
+                           \DataTypeTok{encoding =}\NormalTok{ encoding,}
+                           \DataTypeTok{drop =} \OtherTok{TRUE}\NormalTok{,}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\NormalTok{remaining_}\DecValTok{2006}\NormalTok{ =}\StringTok{ }\KeywordTok{anti_join}\NormalTok{(data_}\DecValTok{2006}\NormalTok{, training_data_}\DecValTok{2006}\NormalTok{, }\DataTypeTok{by =} \StringTok{'id'}\NormalTok{)}
+
+\NormalTok{testing_data_}\DecValTok{2006}\NormalTok{ =}\StringTok{ }\NormalTok{remaining_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{sample_frac}\NormalTok{(.}\DecValTok{5}\NormalTok{)}
+
+\NormalTok{testing_data_}\DecValTok{2006}\NormalTok{ <-}\StringTok{ }\KeywordTok{one_hot_encoder}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ testing_data_}\DecValTok{2006}\NormalTok{,}
+                           \DataTypeTok{encoding =}\NormalTok{ encoding,}
+                           \DataTypeTok{drop =} \OtherTok{TRUE}\NormalTok{,}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\NormalTok{validate_data_}\DecValTok{2006}\NormalTok{ =}\StringTok{ }\KeywordTok{anti_join}\NormalTok{(remaining_}\DecValTok{2006}\NormalTok{, testing_data_}\DecValTok{2006}\NormalTok{, }\DataTypeTok{by =} \StringTok{'id'}\NormalTok{)}
+
+\NormalTok{validate_data_}\DecValTok{2006}\NormalTok{ <-}\StringTok{ }\KeywordTok{one_hot_encoder}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ validate_data_}\DecValTok{2006}\NormalTok{,}
+                           \DataTypeTok{encoding =}\NormalTok{ encoding,}
+                           \DataTypeTok{drop =} \OtherTok{TRUE}\NormalTok{,}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\KeywordTok{rm}\NormalTok{(remaining_}\DecValTok{2006}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{E agora criando um modelo com todas as
+variáveis.}\label{e-agora-criando-um-modelo-com-todas-as-variaveis.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model_}\DecValTok{2006}\NormalTok{ =}\StringTok{ }\KeywordTok{lm}\NormalTok{(votos }\OperatorTok{~}\StringTok{ }\NormalTok{partido.PSDB }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PT }\OperatorTok{+}\StringTok{ }\NormalTok{quantidade_doacoes }\OperatorTok{+}\StringTok{ }\NormalTok{quantidade_doadores }\OperatorTok{+}\StringTok{ }\NormalTok{total_receita }\OperatorTok{+}\StringTok{ }\NormalTok{media_receita}
+                \OperatorTok{+}\StringTok{ }\NormalTok{recursos_de_outros_candidatos.comites }\OperatorTok{+}\StringTok{ }\NormalTok{recursos_de_pessoas_fisicas }\OperatorTok{+}\StringTok{ }\NormalTok{recursos_de_pessoas_juridicas}
+                \OperatorTok{+}\StringTok{ }\NormalTok{recursos_proprios }\OperatorTok{+}\StringTok{ }\NormalTok{recursos_de_partido_politico }\OperatorTok{+}\StringTok{ }\NormalTok{quantidade_despesas }\OperatorTok{+}\StringTok{ }\NormalTok{quantidade_fornecedores}
+                \OperatorTok{+}\StringTok{ }\NormalTok{total_despesa }\OperatorTok{+}\StringTok{  }\NormalTok{media_despesa }\OperatorTok{+}\StringTok{ }\NormalTok{sexo.MASCULINO }\OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.SUPERIOR COMPLETO}\StringTok{`} \OperatorTok{+}\StringTok{ }\NormalTok{sexo.FEMININO}
+                \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.ENSINO FUNDAMENTAL COMPLETO}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.ENSINO FUNDAMENTAL INCOMPLETO}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.ENSINO MÉDIO COMPLETO}\StringTok{`}
+                \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.ENSINO MÉDIO INCOMPLETO}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.LÊ E ESCREVE}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.SUPERIOR INCOMPLETO}\StringTok{`} \OperatorTok{+}\StringTok{ }\NormalTok{partido.DEM}
+                \OperatorTok{+}\StringTok{ `}\DataTypeTok{partido.PC do B}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{partido.PDT}\StringTok{`} \OperatorTok{+}\StringTok{ }\NormalTok{partido.PHS }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PMDB }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PP }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PPS }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PR}
+                \OperatorTok{+}\StringTok{ }\NormalTok{partido.PSB }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PSL }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PSOL }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PTB }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PV }\OperatorTok{+}\StringTok{ }\NormalTok{estado.civil.CASADO.A. }\OperatorTok{+}\StringTok{ }\NormalTok{estado.civil.DIVORCIADO.A.}
+                \OperatorTok{+}\StringTok{ `}\DataTypeTok{estado.civil.SEPARADO.A. JUDICIALMENTE}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{estado.civil.SOLTEIRO.A.}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{estado.civil.VIÚVO.A.}\StringTok{`}\NormalTok{,}
+                \DataTypeTok{data =}\NormalTok{ testing_data_}\DecValTok{2006}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Agora que temos o modelo pronto, famos fazeer uma pequena análise de
+suas significancia.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{glance}\NormalTok{(model_}\DecValTok{2006}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 11
+##   r.squared adj.r.squared  sigma statistic  p.value    df logLik    AIC
+## *     <dbl>         <dbl>  <dbl>     <dbl>    <dbl> <int>  <dbl>  <dbl>
+## 1     0.546         0.521 28844.      21.7 2.96e-88    37 -8011. 16098.
+## # ... with 3 more variables: BIC <dbl>, deviance <dbl>, df.residual <int>
+\end{verbatim}
+
+Nossa estatistica de R² mostra ser moderada, explicando cerca de 54\% da
+variação dos dados, e tendo um diferença mínima para o R² ajustado, o
+que é muito pouco satisfatória, tendo em vista a quantidade de variáveis
+usadas, existe o risco de uma estar atrapalhando outra.
+
+\subsection{Agora fazemos o mesmo processo para os dados de
+2010}\label{agora-fazemos-o-mesmo-processo-para-os-dados-de-2010}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{id <-}\StringTok{ }\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(data_}\DecValTok{2010}\NormalTok{)}
+
+\NormalTok{training_data_}\DecValTok{2010}\NormalTok{ =}\StringTok{ }\NormalTok{data_}\DecValTok{2010} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{sample_frac}\NormalTok{(.}\DecValTok{6}\NormalTok{)}
+
+\NormalTok{encoding <-}\StringTok{ }\KeywordTok{build_encoding}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ training_data_}\DecValTok{2010}\NormalTok{,}
+                           \DataTypeTok{cols =} \KeywordTok{c}\NormalTok{(}\StringTok{"uf"}\NormalTok{,}\StringTok{"sexo"}\NormalTok{,}\StringTok{"grau"}\NormalTok{,}
+                                    \StringTok{"partido"}\NormalTok{,}\StringTok{"estado_civil"}\NormalTok{),}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\NormalTok{training_data_}\DecValTok{2010}\NormalTok{ <-}\StringTok{ }\KeywordTok{one_hot_encoder}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ training_data_}\DecValTok{2010}\NormalTok{,}
+                           \DataTypeTok{encoding =}\NormalTok{ encoding,}
+                           \DataTypeTok{drop =} \OtherTok{TRUE}\NormalTok{,}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\NormalTok{remaining_}\DecValTok{2010}\NormalTok{ =}\StringTok{ }\KeywordTok{anti_join}\NormalTok{(data_}\DecValTok{2010}\NormalTok{, training_data_}\DecValTok{2010}\NormalTok{, }\DataTypeTok{by =} \StringTok{'id'}\NormalTok{)}
+
+\NormalTok{testing_data_}\DecValTok{2010}\NormalTok{ =}\StringTok{ }\NormalTok{remaining_}\DecValTok{2010} \OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{sample_frac}\NormalTok{(.}\DecValTok{5}\NormalTok{)}
+
+\NormalTok{testing_data_}\DecValTok{2010}\NormalTok{ <-}\StringTok{ }\KeywordTok{one_hot_encoder}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ testing_data_}\DecValTok{2010}\NormalTok{,}
+                           \DataTypeTok{encoding =}\NormalTok{ encoding,}
+                           \DataTypeTok{drop =} \OtherTok{TRUE}\NormalTok{,}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\NormalTok{validate_data_}\DecValTok{2010}\NormalTok{ =}\StringTok{ }\KeywordTok{anti_join}\NormalTok{(remaining_}\DecValTok{2010}\NormalTok{, testing_data_}\DecValTok{2010}\NormalTok{, }\DataTypeTok{by =} \StringTok{'id'}\NormalTok{)}
+
+\NormalTok{validate_data_}\DecValTok{2010}\NormalTok{ <-}\StringTok{ }\KeywordTok{one_hot_encoder}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ validate_data_}\DecValTok{2010}\NormalTok{,}
+                           \DataTypeTok{encoding =}\NormalTok{ encoding,}
+                           \DataTypeTok{drop =} \OtherTok{TRUE}\NormalTok{,}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\KeywordTok{rm}\NormalTok{(remaining_}\DecValTok{2010}\NormalTok{)}
+
+\NormalTok{model_}\DecValTok{2010}\NormalTok{ =}\StringTok{ }\KeywordTok{lm}\NormalTok{(votos }\OperatorTok{~}\StringTok{ }\NormalTok{partido.PSDB }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PT }\OperatorTok{+}\StringTok{ }\NormalTok{quantidade_doacoes }\OperatorTok{+}\StringTok{ }\NormalTok{quantidade_doadores }\OperatorTok{+}\StringTok{ }\NormalTok{total_receita }\OperatorTok{+}\StringTok{ }\NormalTok{media_receita}
+                \OperatorTok{+}\StringTok{ }\NormalTok{recursos_de_outros_candidatos.comites }\OperatorTok{+}\StringTok{ }\NormalTok{recursos_de_pessoas_fisicas }\OperatorTok{+}\StringTok{ }\NormalTok{recursos_de_pessoas_juridicas}
+                \OperatorTok{+}\StringTok{ }\NormalTok{recursos_proprios }\OperatorTok{+}\StringTok{ }\NormalTok{recursos_de_partido_politico }\OperatorTok{+}\StringTok{ }\NormalTok{quantidade_despesas }\OperatorTok{+}\StringTok{ }\NormalTok{quantidade_fornecedores}
+                \OperatorTok{+}\StringTok{ }\NormalTok{total_despesa }\OperatorTok{+}\StringTok{  }\NormalTok{media_despesa }\OperatorTok{+}\StringTok{ }\NormalTok{sexo.MASCULINO }\OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.SUPERIOR COMPLETO}\StringTok{`} \OperatorTok{+}\StringTok{ }\NormalTok{sexo.FEMININO}
+                \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.ENSINO FUNDAMENTAL COMPLETO}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.ENSINO FUNDAMENTAL INCOMPLETO}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.ENSINO MÉDIO COMPLETO}\StringTok{`}
+                \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.ENSINO MÉDIO INCOMPLETO}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.LÊ E ESCREVE}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{grau.SUPERIOR INCOMPLETO}\StringTok{`} \OperatorTok{+}\StringTok{ }\NormalTok{partido.DEM}
+                \OperatorTok{+}\StringTok{ `}\DataTypeTok{partido.PC do B}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{partido.PDT}\StringTok{`} \OperatorTok{+}\StringTok{ }\NormalTok{partido.PHS }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PMDB }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PP }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PPS }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PR}
+                \OperatorTok{+}\StringTok{ }\NormalTok{partido.PSB }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PSL }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PSOL }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PTB }\OperatorTok{+}\StringTok{ }\NormalTok{partido.PV }\OperatorTok{+}\StringTok{ }\NormalTok{estado.civil.CASADO.A. }\OperatorTok{+}\StringTok{ }\NormalTok{estado.civil.DIVORCIADO.A.}
+                \OperatorTok{+}\StringTok{ `}\DataTypeTok{estado.civil.SEPARADO.A. JUDICIALMENTE}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{estado.civil.SOLTEIRO.A.}\StringTok{`} \OperatorTok{+}\StringTok{ `}\DataTypeTok{estado.civil.VIÚVO.A.}\StringTok{`}\NormalTok{,}
+                \DataTypeTok{data =}\NormalTok{ testing_data_}\DecValTok{2010}\NormalTok{)}
+
+\KeywordTok{glance}\NormalTok{(model_}\DecValTok{2010}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 11
+##   r.squared adj.r.squared  sigma statistic   p.value    df logLik    AIC
+## *     <dbl>         <dbl>  <dbl>     <dbl>     <dbl> <int>  <dbl>  <dbl>
+## 1     0.565         0.544 30346.      26.3 2.12e-113    39 -9465. 19011.
+## # ... with 3 more variables: BIC <dbl>, deviance <dbl>, df.residual <int>
+\end{verbatim}
+
+Vemos que, para os dados de 2010, o modelo com todas as variáveis se
+torna um pouco mais representativo, explicando cerca de 64\% da mudança
+nos dados, e com um R² ajustado bem próximo disso, então acho que
+podemos considerar que o modelo com todas as variáveis não seria válido
+para esses dados.
+
+Pórem, uma análise embasada somento no R² e R² ajustado pode estar nos
+levando a uma opinião muito inocente sobre o modelo, então, a seguir,
+faremos uma série de outras análises em cima do modelo, para podermos
+ter uma opinião mais fortemente embasado sobre sua eficacia.
+
+\subsection{Então, vamos ter um breve visão para uma das nossas
+perguntas.}\label{entao-vamos-ter-um-breve-visao-para-uma-das-nossas-perguntas.}
+
+\begin{quote}
+Quais variáveis conseguem explicar melhor o número de votos? Compare
+essas variáveis entre os modelos. Mesma coisa para as variáveis menos
+explicativas.
+\end{quote}
+
+Primeiro vamos ver quais variáveis tiveram um p-valor mais alto, ou
+seja, os que se mostram menos confiáveis.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# preditores com p valor alto}
+\KeywordTok{tidy}\NormalTok{(model_}\DecValTok{2006}\NormalTok{, }
+     \DataTypeTok{conf.int =} \OtherTok{TRUE}\NormalTok{, }
+     \DataTypeTok{conf.level =}\NormalTok{ .}\DecValTok{97}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{top_n}\NormalTok{(}\DecValTok{3}\NormalTok{, p.value) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\KeywordTok{reorder}\NormalTok{(term, p.value), p.value)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Variable"}\NormalTok{,}
+       \DataTypeTok{y =} \StringTok{"Estimation (97% of confidence)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-19-1.pdf}
+
+E agora, no extremo contrário, as variáveis com p-valor mais baixo.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# preditores com um p valor baixo}
+\KeywordTok{tidy}\NormalTok{(model_}\DecValTok{2006}\NormalTok{, }
+     \DataTypeTok{conf.int =} \OtherTok{TRUE}\NormalTok{, }
+     \DataTypeTok{conf.level =} \FloatTok{0.97}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(p.value) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{slice}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\KeywordTok{reorder}\NormalTok{(term, p.value), p.value)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{yintercept =} \FloatTok{0.05}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \FloatTok{3.5}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Variable"}\NormalTok{,}
+       \DataTypeTok{y =} \StringTok{"Estimated value (97% of confidence)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-20-1.pdf}
+
+E agora para os dados de 2010, primeiramente para p-valor alto
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tidy}\NormalTok{(model_}\DecValTok{2010}\NormalTok{, }
+     \DataTypeTok{conf.int =} \OtherTok{TRUE}\NormalTok{, }
+     \DataTypeTok{conf.level =}\NormalTok{ .}\DecValTok{97}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{top_n}\NormalTok{(}\DecValTok{3}\NormalTok{, p.value) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\KeywordTok{reorder}\NormalTok{(term, p.value), p.value)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Variable"}\NormalTok{,}
+       \DataTypeTok{y =} \StringTok{"Estimation (97% of confidence)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-21-1.pdf}
+
+e agora, p-valor baixo
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{tidy}\NormalTok{(model_}\DecValTok{2010}\NormalTok{, }
+     \DataTypeTok{conf.int =} \OtherTok{TRUE}\NormalTok{, }
+     \DataTypeTok{conf.level =} \FloatTok{0.97}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(p.value) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{slice}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{3}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\KeywordTok{reorder}\NormalTok{(term, p.value), p.value)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{yintercept =} \FloatTok{0.05}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{size =} \FloatTok{3.5}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{x =} \StringTok{"Variable"}\NormalTok{,}
+       \DataTypeTok{y =} \StringTok{"Estimated value (97% of confidence)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-22-1.pdf}
+
+Nos gráficos acima, podemos perceber em linhas gerais que variáveis
+ligadas ao montante de dinheiro que os partidos investem eu suas
+campanhas parecem mais seguramente relacionadas ao número de vostos
+adquiridos em ambas as campanhas, com a excessão da presensa da variável
+partido-PR para 2010, e como variáveis suspeitas de não terem relação
+com o número de votos estão as relacionadas com qual o partido politico
+e escolaridade do cadidato, juntamente com seu estado civil, que se
+torna menos importante ainda, nas eleições de 2010.
+
+\section{Análise de resíduos}\label{analise-de-residuos}
+
+\subsection{Residual vs Fitted}\label{residual-vs-fitted}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model_}\DecValTok{2006} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.fitted, .resid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{col=}\StringTok{"red"}\NormalTok{,}
+             \DataTypeTok{yintercept =} \DecValTok{0}\NormalTok{,}
+             \DataTypeTok{linetype=}\StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y=}\StringTok{"Residuals"}\NormalTok{,}
+       \DataTypeTok{x=}\StringTok{"Fitted values"}\NormalTok{,}
+       \DataTypeTok{title=}\StringTok{"Residual vs Fitted Plot (2006)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-23-1.pdf}
+
+E agora para os dados de 2010
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model_}\DecValTok{2010} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.fitted, .resid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{col=}\StringTok{"red"}\NormalTok{,}
+             \DataTypeTok{yintercept =} \DecValTok{0}\NormalTok{,}
+             \DataTypeTok{linetype=}\StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y=}\StringTok{"Residuals"}\NormalTok{,}
+       \DataTypeTok{x=}\StringTok{"Fitted values"}\NormalTok{,}
+       \DataTypeTok{title=}\StringTok{"Residual vs Fitted Plot (2010)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-24-1.pdf}
+
+Para ambos os conjuntos de dados, vemos que a distribuição dos pontos
+não é aleatoria nem igualmente distribuida ao longo do eixo x, o que
+pode mostrar que o modelo pode não estar considerando relações não
+lineares, ou indicar que variáveis que seriam importantes ao modelo não
+foram incluidas.
+
+\subsection{Standardized residuals}\label{standardized-residuals}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model_}\DecValTok{2006} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.fitted, }
+             \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{abs}\NormalTok{(.stdresid)))) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{,}
+              \DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Scale-Location (2006)"}\NormalTok{,}
+       \DataTypeTok{x=} \StringTok{"Fitted Value"}\NormalTok{,}
+       \DataTypeTok{y =} \KeywordTok{expression}\NormalTok{(}\KeywordTok{sqrt}\NormalTok{(}\StringTok{"|Standardized residuals|"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-25-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model_}\DecValTok{2010} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.fitted, }
+             \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{abs}\NormalTok{(.stdresid)))) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{,}
+              \DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Scale-Location (2010)"}\NormalTok{,}
+       \DataTypeTok{x=} \StringTok{"Fitted Value"}\NormalTok{,}
+       \DataTypeTok{y =} \KeywordTok{expression}\NormalTok{(}\KeywordTok{sqrt}\NormalTok{(}\StringTok{"|Standardized residuals|"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-26-1.pdf}
+
+Novamente, ambos o modelos não mostram homocedasticidade e mostrarem um
+certo padrão, pode não estar considerando variáveis que são as reais
+responsáveis pela votação de um candidato, ou o excesso de variáveis que
+podem estar atrapalhando o modelo, além do erro irredutivel.
+
+\subsection{Cook's Distance}\label{cooks-distance}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model_}\DecValTok{2006} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.hat, .stdresid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{size=}\NormalTok{.cooksd), }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{, }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Leverage"}\NormalTok{)}\OperatorTok{+}\KeywordTok{ylab}\NormalTok{(}\StringTok{"Standardized Residuals"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Residual vs Leverage Plot (2006)"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_size_continuous}\NormalTok{(}\StringTok{"Cook's Distance"}\NormalTok{, }\DataTypeTok{range=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{5}\NormalTok{)) }\OperatorTok{+}\StringTok{    }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"bottom"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-27-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{model_}\DecValTok{2010} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.hat, .stdresid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{size=}\NormalTok{.cooksd), }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{, }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Leverage"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Standardized Residuals"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Residual vs Leverage Plot (2010)"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_size_continuous}\NormalTok{(}\StringTok{"Cook's Distance"}\NormalTok{, }\DataTypeTok{range=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{5}\NormalTok{)) }\OperatorTok{+}\StringTok{    }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"bottom"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-28-1.pdf}
+
+Para ambas as eleições vemos muitos valores com distancias de cook muito
+altas, o que mostra o o modelo é distoante com muitos dos valores, o que
+pode nos dizer que o modelo é bom, pois existem muitos dados que se
+mostram grandes influenciadores do modelo, mesmo quando a modelagem pode
+os ver como ouliers.
+
+\section{Validação 2006}\label{validacao-2006}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions <-}\StringTok{ }\NormalTok{model_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }\KeywordTok{predict}\NormalTok{(validate_data_}\DecValTok{2006}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in predict.lm(., validate_data_2006): prediction from a rank-
+## deficient fit may be misleading
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{data.frame}\NormalTok{( }\DataTypeTok{R2 =} \KeywordTok{R2}\NormalTok{(predictions, validate_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{RMSE =} \KeywordTok{RMSE}\NormalTok{(predictions, validate_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{MAE =} \KeywordTok{MAE}\NormalTok{(predictions, validate_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{ERR =} \KeywordTok{RMSE}\NormalTok{(predictions, validate_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos)}\OperatorTok{/}
+\StringTok{                  }\KeywordTok{mean}\NormalTok{(validate_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##         R2    RMSE      MAE      ERR
+## 1 0.576481 28340.5 15924.48 1.109683
+\end{verbatim}
+
+O modelo conseguiu um R² de 0,57, isso significa que esse modelo explica
+aproximadamente 57\% da variabilidade da variável resposta. A diferença
+média entre os valores de resultados conhecidos observados e os valores
+previstos pelo modelo (RMSE) foi de aproximadamente 28340,5 issod quer
+dizer que o modelo erraria aproximadamente 28340, ou seja, se o
+candidato tivesse um milhão de votos, nós preveríamos até 28340
+mais/menos do que deveríamos A diferença absoluta média entre os
+resultados observados e previstos (MAE) foi de aproximadamente 15924.48.
+A taxa de erro de previsão (ERR) foi de 1.109683.
+
+\subsection{Teste 2006}\label{teste-2006}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions <-}\StringTok{ }\NormalTok{model_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }\KeywordTok{predict}\NormalTok{(testing_data_}\DecValTok{2006}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in predict.lm(., testing_data_2006): prediction from a rank-
+## deficient fit may be misleading
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{data.frame}\NormalTok{( }\DataTypeTok{R2 =} \KeywordTok{R2}\NormalTok{(predictions, testing_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{RMSE =} \KeywordTok{RMSE}\NormalTok{(predictions, testing_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{MAE =} \KeywordTok{MAE}\NormalTok{(predictions, testing_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{ERR =} \KeywordTok{RMSE}\NormalTok{(predictions, testing_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos)}\OperatorTok{/}
+\StringTok{              }\KeywordTok{mean}\NormalTok{(testing_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          R2     RMSE      MAE      ERR
+## 1 0.5459182 28056.78 13190.14 1.304018
+\end{verbatim}
+
+O modelo conseguiu um R² de 0,54, isso significa que esse modelo explica
+aproximadamente 54\% da variabilidade da variável resposta. A diferença
+média entre os valores de resultados conhecidos observados e os valores
+previstos pelo modelo (RMSE) foi de aproximadamente 28056.78 isso quer
+dizer que o modelo erraria aproximadamente 28056, ou seja, se o
+candidato tivesse um milhão de votos, nós preveríamos até 28056
+mais/menos do que deveríamos A diferença absoluta média entre os
+resultados observados e previstos (MAE) foi de aproximadamente 13190.14.
+A taxa de erro de previsão (ERR) foi de 1.304018.
+
+\subsection{Validação 2010}\label{validacao-2010}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions <-}\StringTok{ }\NormalTok{model_}\DecValTok{2010} \OperatorTok{%>%}\StringTok{ }\KeywordTok{predict}\NormalTok{(validate_data_}\DecValTok{2010}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in predict.lm(., validate_data_2010): prediction from a rank-
+## deficient fit may be misleading
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{data.frame}\NormalTok{( }\DataTypeTok{R2 =} \KeywordTok{R2}\NormalTok{(predictions, validate_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{RMSE =} \KeywordTok{RMSE}\NormalTok{(predictions, validate_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{MAE =} \KeywordTok{MAE}\NormalTok{(predictions, validate_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{ERR =} \KeywordTok{RMSE}\NormalTok{(predictions, validate_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos)}\OperatorTok{/}
+\StringTok{              }\KeywordTok{mean}\NormalTok{(validate_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          R2     RMSE      MAE      ERR
+## 1 0.4471089 31995.79 14931.24 1.609008
+\end{verbatim}
+
+O modelo conseguiu um R² de 0,44, isso significa que esse modelo explica
+aproximadamente 56\% da variabilidade da variável resposta. A diferença
+média entre os valores de resultados conhecidos observados e os valores
+previstos pelo modelo (RMSE) foi de aproximadamente 31995.79 issod quer
+dizer que o modelo erraria aproximadamente 31995, ou seja, se o
+candidato tivesse um milhão de votos, nós preveríamos até 31995
+mais/menos do que deveríamos A diferença absoluta média entre os
+resultados observados e previstos (MAE) foi de aproximadamente 14931.24.
+A taxa de erro de previsão (ERR) foi de 1.399707.
+
+\subsection{Teste 2010}\label{teste-2010}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions <-}\StringTok{ }\NormalTok{model_}\DecValTok{2010} \OperatorTok{%>%}\StringTok{ }\KeywordTok{predict}\NormalTok{(testing_data_}\DecValTok{2010}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in predict.lm(., testing_data_2010): prediction from a rank-
+## deficient fit may be misleading
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{data.frame}\NormalTok{( }\DataTypeTok{R2 =} \KeywordTok{R2}\NormalTok{(predictions, testing_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{RMSE =} \KeywordTok{RMSE}\NormalTok{(predictions, testing_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{MAE =} \KeywordTok{MAE}\NormalTok{(predictions, testing_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{ERR =} \KeywordTok{RMSE}\NormalTok{(predictions, testing_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos)}\OperatorTok{/}
+\StringTok{              }\KeywordTok{mean}\NormalTok{(testing_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          R2     RMSE      MAE      ERR
+## 1 0.5653732 29604.97 14371.57 1.399707
+\end{verbatim}
+
+O modelo conseguiu um R² de 0,56, isso significa que esse modelo explica
+aproximadamente 56\% da variabilidade da variável resposta. A diferença
+média entre os valores de resultados conhecidos observados e os valores
+previstos pelo modelo (RMSE) foi de aproximadamente 29604.97 issod quer
+dizer que o modelo erraria aproximadamente 29604, ou seja, se o
+candidato tivesse um milhão de votos, nós preveríamos até 29604
+mais/menos do que deveríamos A diferença absoluta média entre os
+resultados observados e previstos (MAE) foi de aproximadamente 14371.57.
+A taxa de erro de previsão (ERR) foi de 1.399707.
+
+\section{Um novo modelo para 2006}\label{um-novo-modelo-para-2006}
+
+Agora vamos construir um modelo apenas com as variáveis que foram
+jugadas como importantes pela análise de correlação e medição do
+p-valor.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod_}\DecValTok{2006}\NormalTok{ <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(votos }\OperatorTok{~}\StringTok{ }\NormalTok{total_receita }\OperatorTok{*}\StringTok{ }\NormalTok{total_despesa }\OperatorTok{*}\StringTok{ }\NormalTok{recursos_de_pessoas_juridicas,}
+          \DataTypeTok{data =}\NormalTok{ training_data_}\DecValTok{2006}\NormalTok{)}
+
+\KeywordTok{glance}\NormalTok{(mod_}\DecValTok{2006}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 11
+##   r.squared adj.r.squared  sigma statistic   p.value    df  logLik    AIC
+## *     <dbl>         <dbl>  <dbl>     <dbl>     <dbl> <int>   <dbl>  <dbl>
+## 1     0.507         0.506 33239.      302. 3.42e-310     8 -24390. 48799.
+## # ... with 3 more variables: BIC <dbl>, deviance <dbl>, df.residual <int>
+\end{verbatim}
+
+Nossa estatistica de R² émoderada/baixa, explicando cerca de 50\% da
+variação dos dados, e tendo um diferença mínima para o R² ajustado, o
+que é pouco satisfatória, porém mais análises podem ser feitas.
+
+\subsection{Aplicando a ele os mesmos processos de análise de qualidade
+que aplicamos aos
+anteriores}\label{aplicando-a-ele-os-mesmos-processos-de-analise-de-qualidade-que-aplicamos-aos-anteriores}
+
+\subsubsection{Residual vs Fitted}\label{residual-vs-fitted-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod_}\DecValTok{2006} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.fitted, .resid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{col=}\StringTok{"red"}\NormalTok{,}
+             \DataTypeTok{yintercept=}\DecValTok{0}\NormalTok{,}
+             \DataTypeTok{linetype=}\StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y=}\StringTok{"Residuals"}\NormalTok{,}
+       \DataTypeTok{x=}\StringTok{"Fitted values"}\NormalTok{,}
+       \DataTypeTok{title=}\StringTok{"Residual vs Fitted Plot (2006)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-34-1.pdf}
+
+Vemos que o novo modelo acomoda melhor a distribuição dos dados em tono
+do eixo x, mais ainda não de forma não tão satisfatória, tendo mais
+pontos para um lado que para outro, e um lado mais espalhado que o
+outro, isso pode indicar a falta de alguma variável importante no
+modelo.
+
+\subsubsection{Standardized residuals}\label{standardized-residuals-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod_}\DecValTok{2006} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.fitted, }
+             \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{abs}\NormalTok{(.stdresid)))) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{,}
+              \DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Scale-Location (2006)"}\NormalTok{,}
+       \DataTypeTok{x=} \StringTok{"Fitted Value"}\NormalTok{,}
+       \DataTypeTok{y =} \KeywordTok{expression}\NormalTok{(}\KeywordTok{sqrt}\NormalTok{(}\StringTok{"|Standardized residuals|"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-35-1.pdf}
+
+Novamente, o modelo mostra certa homocedasticidade mas tem também os
+problemas coma aleatoriedade, tendo em vista que os pontos não são
+distribuidos igualmente, algo que pode estar não só atrelado ao erro
+irredutivel, mas ainda sim, mostra uma melhora significativa se
+comparado ao modelo com todas as variáveis.
+
+\subsubsection{Cook's Distance}\label{cooks-distance-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod_}\DecValTok{2006} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.hat, .stdresid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{size=}\NormalTok{.cooksd), }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{, }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Leverage"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Standardized Residuals"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Residual vs Leverage Plot (2006)"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_size_continuous}\NormalTok{(}\StringTok{"Cook's Distance"}\NormalTok{, }\DataTypeTok{range=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{5}\NormalTok{)) }\OperatorTok{+}\StringTok{    }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"bottom"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-36-1.pdf}
+
+Vemos também valores bem menores para distancia de cook e para bem menos
+pontos distoantes, o que pode nos dizer que o modelo se encontra em
+conformidade considerável com a variação os dados.
+
+\subsection{Validação 2006}\label{validacao-2006-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions <-}\StringTok{ }\NormalTok{mod_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }\KeywordTok{predict}\NormalTok{(validate_data_}\DecValTok{2006}\NormalTok{)}
+
+\KeywordTok{data.frame}\NormalTok{( }\DataTypeTok{R2 =} \KeywordTok{R2}\NormalTok{(predictions, validate_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{RMSE =} \KeywordTok{RMSE}\NormalTok{(predictions, validate_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{MAE =} \KeywordTok{MAE}\NormalTok{(predictions, validate_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{ERR =} \KeywordTok{RMSE}\NormalTok{(predictions, validate_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos)}\OperatorTok{/}
+\StringTok{              }\KeywordTok{mean}\NormalTok{(validate_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          R2     RMSE      MAE       ERR
+## 1 0.7112785 23389.79 12379.08 0.9158357
+\end{verbatim}
+
+O modelo conseguiu um R² de 0,71, isso significa que esse modelo explica
+aproximadamente 71\% da variabilidade da variável resposta. A diferença
+média entre os valores de resultados conhecidos observados e os valores
+previstos pelo modelo (RMSE) foi de aproximadamente 23389.79 issod quer
+dizer que o modelo erraria aproximadamente 29604, ou seja, se o
+candidato tivesse um milhão de votos, nós preveríamos até 29326
+mais/menos do que deveríamos A diferença absoluta média entre os
+resultados observados e previstos (MAE) foi de aproximadamente 12379.08
+A taxa de erro de previsão (ERR) foi de 0.9158357.
+
+\subsection{Teste 2006}\label{teste-2006-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions <-}\StringTok{ }\NormalTok{mod_}\DecValTok{2006} \OperatorTok{%>%}\StringTok{ }\KeywordTok{predict}\NormalTok{(testing_data_}\DecValTok{2006}\NormalTok{)}
+
+\KeywordTok{data.frame}\NormalTok{( }\DataTypeTok{R2 =} \KeywordTok{R2}\NormalTok{(predictions, testing_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{RMSE =} \KeywordTok{RMSE}\NormalTok{(predictions, testing_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{MAE =} \KeywordTok{MAE}\NormalTok{(predictions, testing_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{ERR =} \KeywordTok{RMSE}\NormalTok{(predictions, testing_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos)}\OperatorTok{/}
+\StringTok{              }\KeywordTok{mean}\NormalTok{(testing_data_}\DecValTok{2006}\OperatorTok{$}\NormalTok{votos))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          R2     RMSE      MAE      ERR
+## 1 0.4827787 30105.75 12779.06 1.399249
+\end{verbatim}
+
+O modelo conseguiu um R² de 0,48, isso significa que esse modelo explica
+aproximadamente 48\% da variabilidade da variável resposta. A diferença
+média entre os valores de resultados conhecidos observados e os valores
+previstos pelo modelo (RMSE) foi de aproximadamente 30105.75 issod quer
+dizer que o modelo erraria aproximadamente 30105, ou seja, se o
+candidato tivesse um milhão de votos, nós preveríamos até 30105
+mais/menos do que deveríamos A diferença absoluta média entre os
+resultados observados e previstos (MAE) foi de aproximadamente 12779.06.
+A taxa de erro de previsão (ERR) foi de 1.399249.
+
+\section{Um novo modelo para 2010}\label{um-novo-modelo-para-2010}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod_}\DecValTok{2010}\NormalTok{ <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(votos }\OperatorTok{~}\StringTok{ }\NormalTok{total_receita }\OperatorTok{*}\StringTok{ }\NormalTok{total_despesa }\OperatorTok{*}\StringTok{ }\NormalTok{recursos_de_pessoas_juridicas,}
+          \DataTypeTok{data =}\NormalTok{ training_data_}\DecValTok{2010}\NormalTok{)}
+
+\KeywordTok{glance}\NormalTok{(mod_}\DecValTok{2010}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 11
+##   r.squared adj.r.squared  sigma statistic p.value    df  logLik    AIC
+## *     <dbl>         <dbl>  <dbl>     <dbl>   <dbl> <int>   <dbl>  <dbl>
+## 1     0.467         0.466 38914.      303.       0     8 -29055. 58128.
+## # ... with 3 more variables: BIC <dbl>, deviance <dbl>, df.residual <int>
+\end{verbatim}
+
+Nossa estatistica de R² baixa, explicando cerca de 46\% da variação dos
+dados, e tendo um diferença mínima para o R² ajustado, o que é pouco
+satisfatória, porém por ser bem mais simples do que a com todas as
+variáveis alguma diminuição era esperanda, vamos fazer análises de
+residuos então.
+
+\subsection{Residual vs Fitted Plot}\label{residual-vs-fitted-plot}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod_}\DecValTok{2010} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.fitted, .resid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{col=}\StringTok{"red"}\NormalTok{,}
+             \DataTypeTok{yintercept=}\DecValTok{0}\NormalTok{,}
+             \DataTypeTok{linetype=}\StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y=}\StringTok{"Residuals"}\NormalTok{,}
+       \DataTypeTok{x=}\StringTok{"Fitted values"}\NormalTok{,}
+       \DataTypeTok{title=}\StringTok{"Residual vs Fitted Plot (2010)"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-40-1.pdf}
+
+Vemos que o novo modelo acomoda muito melhor a distribuição dos dados em
+tono do eixo x, mais ainda não de forma não tão satisfatória, tendo mais
+pontos para um lado que para outro, e um lado um pouco mais espalhado
+que o outro, mostrando que o modelo não se ajusta totalmente.
+
+\subsection{Standardized residuals}\label{standardized-residuals-2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod_}\DecValTok{2010} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.fitted, }
+             \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{abs}\NormalTok{(.stdresid)))) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{,}
+              \DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Scale-Location (2010)"}\NormalTok{,}
+       \DataTypeTok{x=} \StringTok{"Fitted Value"}\NormalTok{,}
+       \DataTypeTok{y =} \KeywordTok{expression}\NormalTok{(}\KeywordTok{sqrt}\NormalTok{(}\StringTok{"|Standardized residuals|"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-41-1.pdf}
+
+O modelo mostra certa homocedasticidade mas tem também os problemas coma
+aleatoriedade, tendo em vista que os pontos não são distribuidos
+igualmente, algo que pode estar não só atrelado ao erro irredutivel, mas
+ainda sim, mostra uma melhora significativa se comparado ao modelo com
+todas as variáveis.
+
+\subsection{Cook's Distance}\label{cooks-distance-2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod_}\DecValTok{2010} \OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.hat, .stdresid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{size=}\NormalTok{.cooksd), }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{, }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Leverage"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Standardized Residuals"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Residual vs Leverage Plot (2006)"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_size_continuous}\NormalTok{(}\StringTok{"Cook's Distance"}\NormalTok{, }\DataTypeTok{range=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{5}\NormalTok{)) }\OperatorTok{+}\StringTok{    }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"bottom"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-42-1.pdf}
+
+Vemos também valores extremamente menores para distancia de cook e para
+bem menos pontos distoantes, o que pode nos dizer que o modelo se
+encontra em conformidade considerável com os a variação dos dados.
+
+\subsection{Validação 2010}\label{validacao-2010-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions <-}\StringTok{ }\NormalTok{mod_}\DecValTok{2010} \OperatorTok{%>%}\StringTok{ }\KeywordTok{predict}\NormalTok{(validate_data_}\DecValTok{2010}\NormalTok{)}
+
+\KeywordTok{data.frame}\NormalTok{( }\DataTypeTok{R2 =} \KeywordTok{R2}\NormalTok{(predictions, validate_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{RMSE =} \KeywordTok{RMSE}\NormalTok{(predictions, validate_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{MAE =} \KeywordTok{MAE}\NormalTok{(predictions, validate_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{ERR =} \KeywordTok{RMSE}\NormalTok{(predictions, validate_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos)}\OperatorTok{/}
+\StringTok{              }\KeywordTok{mean}\NormalTok{(validate_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##         R2     RMSE      MAE      ERR
+## 1 0.553787 28410.54 11804.81 1.428713
+\end{verbatim}
+
+O modelo conseguiu um R² de 0.55, isso significa que esse modelo explica
+aproximadamente 48\% da variabilidade da variável resposta. A diferença
+média entre os valores de resultados conhecidos observados e os valores
+previstos pelo modelo (RMSE) foi de aproximadamente 28410.54 issod quer
+dizer que o modelo erraria aproximadamente 28410, ou seja, se o
+candidato tivesse um milhão de votos, nós preveríamos até 28410
+mais/menos do que deveríamos A diferença absoluta média entre os
+resultados observados e previstos (MAE) foi de aproximadamente 11804.81.
+A taxa de erro de previsão (ERR) foi de 1.428713.
+
+\subsection{Teste 2010}\label{teste-2010-1}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions <-}\StringTok{ }\NormalTok{mod_}\DecValTok{2010} \OperatorTok{%>%}\StringTok{ }\KeywordTok{predict}\NormalTok{(testing_data_}\DecValTok{2010}\NormalTok{)}
+
+\KeywordTok{data.frame}\NormalTok{( }\DataTypeTok{R2 =} \KeywordTok{R2}\NormalTok{(predictions, testing_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{RMSE =} \KeywordTok{RMSE}\NormalTok{(predictions, testing_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{MAE =} \KeywordTok{MAE}\NormalTok{(predictions, testing_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{ERR =} \KeywordTok{RMSE}\NormalTok{(predictions, testing_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos)}\OperatorTok{/}
+\StringTok{              }\KeywordTok{mean}\NormalTok{(testing_data_}\DecValTok{2010}\OperatorTok{$}\NormalTok{votos))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          R2     RMSE      MAE      ERR
+## 1 0.5775215 29194.57 11922.71 1.380304
+\end{verbatim}
+
+O modelo conseguiu um R² de 0,57, isso significa que esse modelo explica
+aproximadamente 57\% da variabilidade da variável resposta. A diferença
+média entre os valores de resultados conhecidos observados e os valores
+previstos pelo modelo (RMSE) foi de aproximadamente 29194.57 isso quer
+dizer que o modelo erraria aproximadamente 29194, ou seja, se o
+candidato tivesse um milhão de votos, nós preveríamos até 29194
+mais/menos do que deveríamos A diferença absoluta média entre os
+resultados observados e previstos (MAE) foi de aproximadamente
+11922.71.\\
+A taxa de erro de previsão (ERR) foi de 1.380304.
+
+\section{Um modelo conjunto}\label{um-modelo-conjunto}
+
+\subsection{Construindo conjuntos de treino teste e
+validação}\label{construindo-conjuntos-de-treino-teste-e-validacao}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{eleicoes_data}\OperatorTok{$}\NormalTok{id <-}\StringTok{ }\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(eleicoes_data)}
+
+\NormalTok{training_data =}\StringTok{ }\NormalTok{eleicoes_data }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{sample_frac}\NormalTok{(.}\DecValTok{6}\NormalTok{)}
+
+\NormalTok{encoding <-}\StringTok{ }\KeywordTok{build_encoding}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ training_data,}
+                           \DataTypeTok{cols =} \KeywordTok{c}\NormalTok{(}\StringTok{"uf"}\NormalTok{,}\StringTok{"sexo"}\NormalTok{,}\StringTok{"grau"}\NormalTok{,}
+                                    \StringTok{"partido"}\NormalTok{,}\StringTok{"estado_civil"}\NormalTok{),}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\NormalTok{training_data <-}\StringTok{ }\KeywordTok{one_hot_encoder}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ training_data,}
+                           \DataTypeTok{encoding =}\NormalTok{ encoding,}
+                           \DataTypeTok{drop =} \OtherTok{TRUE}\NormalTok{,}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\NormalTok{remaining =}\StringTok{ }\KeywordTok{anti_join}\NormalTok{(eleicoes_data, training_data, }\DataTypeTok{by =} \StringTok{'id'}\NormalTok{)}
+
+\NormalTok{testing_data =}\StringTok{ }\NormalTok{remaining }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{sample_frac}\NormalTok{(.}\DecValTok{5}\NormalTok{)}
+
+\NormalTok{testing_data <-}\StringTok{ }\KeywordTok{one_hot_encoder}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ testing_data,}
+                           \DataTypeTok{encoding =}\NormalTok{ encoding,}
+                           \DataTypeTok{drop =} \OtherTok{TRUE}\NormalTok{,}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\NormalTok{validate_data =}\StringTok{ }\KeywordTok{anti_join}\NormalTok{(remaining, testing_data, }\DataTypeTok{by =} \StringTok{'id'}\NormalTok{)}
+
+\NormalTok{validate_data <-}\StringTok{ }\KeywordTok{one_hot_encoder}\NormalTok{(}\DataTypeTok{dataSet =}\NormalTok{ validate_data,}
+                           \DataTypeTok{encoding =}\NormalTok{ encoding,}
+                           \DataTypeTok{drop =} \OtherTok{TRUE}\NormalTok{,}
+                           \DataTypeTok{verbose =}\NormalTok{ F)}
+
+\KeywordTok{rm}\NormalTok{(remaining)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Constuindo o modelo}\label{constuindo-o-modelo}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod <-}\StringTok{ }\KeywordTok{lm}\NormalTok{(votos }\OperatorTok{~}\StringTok{ }\NormalTok{total_receita }\OperatorTok{*}\StringTok{ }\NormalTok{total_despesa }\OperatorTok{*}\StringTok{ }\NormalTok{recursos_de_pessoas_juridicas,}
+          \DataTypeTok{data =}\NormalTok{ training_data)}
+
+\KeywordTok{glance}\NormalTok{(mod)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 1 x 11
+##   r.squared adj.r.squared  sigma statistic p.value    df  logLik    AIC
+## *     <dbl>         <dbl>  <dbl>     <dbl>   <dbl> <int>   <dbl>  <dbl>
+## 1     0.486         0.485 33744.      606.       0     8 -53135. 1.06e5
+## # ... with 3 more variables: BIC <dbl>, deviance <dbl>, df.residual <int>
+\end{verbatim}
+
+A estatistica de R² está um pouco baixa, explicando cerca de 48\% da
+variação dos dados, e tendo um diferença mínima para o R² ajustado, o
+que é pouco satisfatória, vamos agora a análise de residuos para termos
+um panorama mais completos
+
+\subsection{Residual vs Fitted}\label{residual-vs-fitted-2}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.fitted, .resid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{col=}\StringTok{"red"}\NormalTok{,}
+             \DataTypeTok{yintercept=}\DecValTok{0}\NormalTok{,}
+             \DataTypeTok{linetype=}\StringTok{"dashed"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{y=}\StringTok{"Residuals"}\NormalTok{,}
+       \DataTypeTok{x=}\StringTok{"Fitted values"}\NormalTok{,}
+       \DataTypeTok{title=}\StringTok{"Residual vs Fitted Plot"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-47-1.pdf}
+
+Vemos que o novo modelo acomoda bem a distribuição dos dados em tono do
+eixo x,mesmo que só ocupando a parte central do gráfico a dispersão
+parae aleatória, o que é um bom sinal.
+
+\subsection{Standardized residuals}\label{standardized-residuals-3}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.fitted, }
+             \KeywordTok{sqrt}\NormalTok{(}\KeywordTok{abs}\NormalTok{(.stdresid)))) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{,}
+              \DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Scale-Location"}\NormalTok{,}
+       \DataTypeTok{x=} \StringTok{"Fitted Value"}\NormalTok{,}
+       \DataTypeTok{y =} \KeywordTok{expression}\NormalTok{(}\KeywordTok{sqrt}\NormalTok{(}\StringTok{"|Standardized residuals|"}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-48-1.pdf}
+
+Nesta análise ele também mostra ter um dispersão parcialmente aleatória,
+muito concentrada no meio pra cima do gráfico
+
+\subsection{Cook's Distance}\label{cooks-distance-3}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mod }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(.hat, .stdresid)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{size=}\NormalTok{.cooksd), }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_smooth}\NormalTok{(}\DataTypeTok{method=}\StringTok{"loess"}\NormalTok{, }\DataTypeTok{na.rm=}\OtherTok{TRUE}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlab}\NormalTok{(}\StringTok{"Leverage"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ylab}\NormalTok{(}\StringTok{"Standardized Residuals"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Residual vs Leverage Plot"}\NormalTok{) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{scale_size_continuous}\NormalTok{(}\StringTok{"Cook's Distance"}\NormalTok{, }\DataTypeTok{range=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{5}\NormalTok{)) }\OperatorTok{+}\StringTok{    }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position=}\StringTok{"bottom"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{linear-regression_files/figure-latex/unnamed-chunk-49-1.pdf}
+
+Vemos também valores um pouco altos para distancia de cookmas para
+poucos pontos, o que pode nos dizer que o modelo se encontra em
+conformidade considerável com os a variação dos dados.
+
+\subsection{Validação}\label{validacao}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions <-}\StringTok{ }\NormalTok{mod }\OperatorTok{%>%}\StringTok{ }\KeywordTok{predict}\NormalTok{(validate_data)}
+
+\KeywordTok{data.frame}\NormalTok{( }\DataTypeTok{R2 =} \KeywordTok{R2}\NormalTok{(predictions, validate_data}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{RMSE =} \KeywordTok{RMSE}\NormalTok{(predictions, validate_data}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{MAE =} \KeywordTok{MAE}\NormalTok{(predictions, validate_data}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{ERR =} \KeywordTok{RMSE}\NormalTok{(predictions, validate_data}\OperatorTok{$}\NormalTok{votos)}\OperatorTok{/}
+\StringTok{              }\KeywordTok{mean}\NormalTok{(validate_data}\OperatorTok{$}\NormalTok{votos))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##         R2     RMSE      MAE      ERR
+## 1 0.523096 32477.57 13833.14 1.372553
+\end{verbatim}
+
+O modelo conseguiu um R² de 0,52, isso significa que esse modelo explica
+aproximadamente 52\% da variabilidade da variável resposta. A diferença
+média entre os valores de resultados conhecidos observados e os valores
+previstos pelo modelo (RMSE) foi de aproximadamente 32477.57 isso quer
+dizer que o modelo erraria aproximadamente 32477, ou seja, se o
+candidato tivesse um milhão de votos, nós preveríamos até 32477
+mais/menos do que deveríamos A diferença absoluta média entre os
+resultados observados e previstos (MAE) foi de aproximadamente
+13833.14.\\
+A taxa de erro de previsão (ERR) foi de
+
+\subsection{Teste}\label{teste}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{predictions <-}\StringTok{ }\NormalTok{mod }\OperatorTok{%>%}\StringTok{ }\KeywordTok{predict}\NormalTok{(testing_data)}
+
+\KeywordTok{data.frame}\NormalTok{( }\DataTypeTok{R2 =} \KeywordTok{R2}\NormalTok{(predictions, testing_data}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{RMSE =} \KeywordTok{RMSE}\NormalTok{(predictions, testing_data}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{MAE =} \KeywordTok{MAE}\NormalTok{(predictions, testing_data}\OperatorTok{$}\NormalTok{votos),}
+            \DataTypeTok{ERR =} \KeywordTok{RMSE}\NormalTok{(predictions, testing_data}\OperatorTok{$}\NormalTok{votos)}\OperatorTok{/}
+\StringTok{              }\KeywordTok{mean}\NormalTok{(testing_data}\OperatorTok{$}\NormalTok{votos))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          R2     RMSE      MAE      ERR
+## 1 0.4504193 37515.32 13578.44 1.686544
+\end{verbatim}
+
+O modelo conseguiu um R² de 0,45, isso significa que esse modelo explica
+aproximadamente 57\% da variabilidade da variável resposta. A diferença
+média entre os valores de resultados conhecidos observados e os valores
+previstos pelo modelo (RMSE) foi de aproximadamente 37515.32 isso quer
+dizer que o modelo erraria aproximadamente 37515, ou seja, se o
+candidato tivesse um milhão de votos, nós preveríamos até 37515
+mais/menos do que deveríamos A diferença absoluta média entre os
+resultados observados e previstos (MAE) foi de aproximadamente
+13578.44.\\
+A taxa de erro de previsão (ERR) foi de 1.686544.
+
+\begin{quote}
+Com base nesses dados posso afirmar que o modelo não é muito
+satisfátório, porem pode ser bastante melhorado, principalmente porque
+algumas das suas estatisticas de residuos mostram problemas e seu R²
+ainda pode ser considerado muito baixo, pois foi um pouco inferior aos
+encontrados nos modelos com todas as variáveis, mas muito mais simples.
+\end{quote}
+
+
+\end{document}
